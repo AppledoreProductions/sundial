@@ -465,10 +465,10 @@
         <button ng-click="timefactor = 0">Pause</button>
         <button ng-click="timefactor = 1">1 second</button>
         <button ng-click="timefactor = 60">1 minute</button>
-        <button ng-click="timefactor = 3600">1 hour</button>
-        <button ng-click="timefactor = 86400">1 day</button>
-        <button ng-click="timefactor = 604800">1 week</button>
-        <button ng-click="timefactor = 2626560">1 month</button>
+        <button ng-click="timefactor = 60*60">1 hour</button>
+        <button ng-click="timefactor = 60*60*24">1 day</button>
+        <button ng-click="timefactor = 60*60*24*7">1 week</button>
+        <button ng-click="timefactor = 60*60*24*30.4">1 month</button>
         <br />
         <br />
         <p>Time shown: <span ng-show="earth" display-date><span display-part-year></span>
