@@ -396,22 +396,26 @@ function displayPartYearDirective() {
          
             // draw initial line set
             $scope.lines = 6;
-            
-         // works, but local geolocation is banned in Chrome, and annoying everywhere else
-         
-         //   if (navigator.geolocation) {
-         //       navigator.geolocation.getCurrentPosition(function(position){
-         //           $scope.$apply(function() {
-         //               $scope.latitude = position.coords.latitude;
-         //               $scope.longitude = position.coords.longitude;
-         //           });
-         //       });
-         //   }
-            
-            // draw initial location
-            // London
-            $scope.latitude = 51.5072;
-            $scope.longitude = 0;
+
+            // locate user
+            $scope.setLocation = function(position) {
+                $scope.$apply(function() {
+                    $scope.latitude = position.coords.latitude;
+                    $scope.longitude = position.coords.longitude;
+                });
+            }
+            $scope.defaultLocation = function(position) {
+                // London
+                $scope.$apply(function() {
+                    $scope.latitude = 51.5072;
+                    $scope.longitude = 0;
+                });
+            }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, { enableHighAccuracy: true })
+            } else {
+                alert("Turn geolocation on.")
+            }
             
             $scope.ticking = undefined;
             
