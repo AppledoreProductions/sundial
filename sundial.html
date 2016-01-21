@@ -1,476 +1,493 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<script src= "http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
-<script>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+    <script>
 
-function degToRad(deg) {
-    return (deg / 360) * (2 * Math.PI);
-}
-
-function drawLineSet(lines, rotation, $scope) {
-
-    // scrape necessary calculation values
-    var centre = $scope.centre;
-    var radius = $scope.radius;
-    var flip = $scope.flip;
-    
-    // avoids infinite loop when drawing
-    if (lines < 1) {
-        lines = 1;
-    }
-    
-    // sets sensible minimum interval of 1 degree
-    if (lines > 90) {
-        lines = 90;
-    }
-    
-    // rotation mod 360
-    while (rotation < 0) {
-        rotation += 360;
-    }
-    while (rotation >= 360) {
-        rotation -= 360;
-    }
-    
-    var equatorStyle = 'stroke:darkgrey;stroke-width:1;fill:none;';
-    var lineStyle = 'stroke:lightgrey; stroke-width:1;fill:none;';
-    var meridianStyle = 'stroke:green;stroke-width:1;fill:none;';
-    
-    // calculate positions of lines
-    var lineIncrementInDegrees = 90 / lines;
-    var lonRings = [];
-    var latLines = [];
-    
-    // locate prime meridian
-    
-    var meridianRotation = rotation;
-    
-    if (meridianRotation > 90 && meridianRotation <= 270) {
-        if (flip) {
-            meridianRotation += 180;
-            if (meridianRotation >= 360) {
-                meridianRotation -= 360;
-            }
-        } else {
-            meridianStyle = 'stroke:red;stroke-width:1;fill:none;';
-            meridianRotation = 0 - meridianRotation;
+        function degToRad(deg) {
+            return (deg / 360) * (2 * Math.PI);
         }
-    }
+
+        function drawGlobeDirective() {
+            var template = '';
+            template += '<svg width="{{boxside}}" height="{{boxside}}">';
+            template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
+            template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
+            template += '<line ng-repeat="line in latLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
+            template += '<ellipse ng-repeat="ring in lonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
+            template += '<rect x="{{locationBox.x}}" y="{{locationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{locationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{yellowclip}}" style="fill:yellow;fill-opacity:25%"></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{greyclip}}" style="fill:darkgrey;fill-opacity:25%"></ellipse>';
+            template += '</svg>';
+            return {
+                template: template
+            };
+        }
+
+        function displayLocationDirective() {
+            return {
+                template: '({{latitude}}, {{longitude}})'
+            };
+        }
+
+        function displaySeasonalEffectDirective() {
+            return {
+                template: '{{seasonaleffectprint}}<br/>{{sunrise}}&nbsp;<br/>{{sunset}}&nbsp;'
+            };
+        }
+
+        function displayDateDirective() {
+            return {
+                template: '{{date.toDateString()}}, {{date.toLocaleTimeString()}}'
+            };
+        }
+
+        function displayPartYearDirective() {
+            return {
+                template: '{{adjustedpartyear}} % of year passed since winter solstice'
+            };
+        }
+
+
+
+        (function(angular) {
+            'use strict';
+            angular
+            .module('sundial', [])
     
-    var radiusOfNewEllipse = Math.sin(degToRad(meridianRotation)) * radius;    
-    if (radiusOfNewEllipse > 0) {
-        lonRings.push({cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'right-prime-meridian'});
-    } else if (radiusOfNewEllipse < 0) {
-        lonRings.push({cx: centre, cy: centre, rx: 0-radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'left-prime-meridian'});
-    } else if (rotation == 0) {
-        lonRings.push({cx: centre, cy: centre, rx: 1, ry: radius, style: meridianStyle, meridian: 'left-prime-meridian'});
-    }
-    
-    // rotation mod gap
-    while (rotation > lineIncrementInDegrees) {
-        rotation -= lineIncrementInDegrees;
-    }
-    // sin(90) = 1
-    rotation += 90;
-    // locate rotating rings
-    for (var i=lineIncrementInDegrees; i<360;) {
-        var radiusOfNewEllipse = Math.sin(degToRad(i + rotation)) * radius;
+                .controller('sundialController', function($scope, $interval) {
         
-        if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
-            lonRings.push({cx: centre, cy: centre, rx: 0-radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'right-prime-meridian'});
-        } else if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse > 0) {
-            lonRings.push({cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'left-prime-meridian'});
-        } else if (i + rotation > 90 && i + rotation <= 270) {
-            lonRings.push({cx: centre, cy: centre, rx: 1, ry: radius, style: lineStyle, meridian: 'left-prime-meridian'});
-        }
+                    $scope.drawLineSet = function(lines, rotation) {
+
+                        // scrape necessary calculation values
+                        var centre = $scope.centre;
+                        var radius = $scope.radius;
+                        var flip = $scope.flip;
+    
+                        // avoids infinite loop when drawing
+                        if (lines < 1) {
+                            lines = 1;
+                        }
+    
+                        // sets sensible minimum interval of 1 degree
+                        if (lines > 90) {
+                            lines = 90;
+                        }
+    
+                        // rotation mod 360
+                        while (rotation < 0) {
+                            rotation += 360;
+                        }
+                        while (rotation >= 360) {
+                            rotation -= 360;
+                        }
+    
+                        var equatorStyle = 'stroke:darkgrey;stroke-width:1;fill:none;';
+                        var lineStyle = 'stroke:lightgrey; stroke-width:1;fill:none;';
+                        var meridianStyle = 'stroke:green;stroke-width:1;fill:none;';
+    
+                        // calculate positions of lines
+                        var lineIncrementInDegrees = 90 / lines;
+                        var lonRings = [];
+                        var latLines = [];
+    
+                        // locate prime meridian
+    
+                        var meridianRotation = rotation;
+    
+                        if (meridianRotation > 90 && meridianRotation <= 270) {
+                            if (flip) {
+                                meridianRotation += 180;
+                                if (meridianRotation >= 360) {
+                                    meridianRotation -= 360;
+                                }
+                            } else {
+                                meridianStyle = 'stroke:red;stroke-width:1;fill:none;';
+                                meridianRotation = 0 - meridianRotation;
+                            }
+                        }
+    
+                        var radiusOfNewEllipse = Math.sin(degToRad(meridianRotation)) * radius;    
+                        if (radiusOfNewEllipse > 0) {
+                            lonRings.push({cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'right-prime-meridian'});
+                        } else if (radiusOfNewEllipse < 0) {
+                            lonRings.push({cx: centre, cy: centre, rx: 0-radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'left-prime-meridian'});
+                        } else if (rotation == 0) {
+                            lonRings.push({cx: centre, cy: centre, rx: 1, ry: radius, style: meridianStyle, meridian: 'left-prime-meridian'});
+                        }
+    
+                        // rotation mod gap
+                        while (rotation > lineIncrementInDegrees) {
+                            rotation -= lineIncrementInDegrees;
+                        }
+                        // sin(90) = 1
+                        rotation += 90;
+                        // locate rotating rings
+                        for (var i=lineIncrementInDegrees; i<360;) {
+                            var radiusOfNewEllipse = Math.sin(degToRad(i + rotation)) * radius;
         
-        i = i + lineIncrementInDegrees;
-    }
+                            if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
+                                lonRings.push({cx: centre, cy: centre, rx: 0-radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'right-prime-meridian'});
+                            } else if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse > 0) {
+                                lonRings.push({cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'left-prime-meridian'});
+                            } else if (i + rotation > 90 && i + rotation <= 270) {
+                                lonRings.push({cx: centre, cy: centre, rx: 1, ry: radius, style: lineStyle, meridian: 'left-prime-meridian'});
+                            }
+        
+                            i = i + lineIncrementInDegrees;
+                        }
     
-    // locate latitude parallels
-    latLines = [{x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle}];
-    for (var i=lineIncrementInDegrees; i<90;) {
-        var heightOfNewLine = Math.sin(degToRad(i)) * radius;
-        var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
-        latLines.push({x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle});
-        latLines.push({x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre - heightOfNewLine, y2: centre - heightOfNewLine, style: lineStyle});
-        i = i + lineIncrementInDegrees;
-    }
+                        // locate latitude parallels
+                        latLines = [{x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle}];
+                        for (var i=lineIncrementInDegrees; i<90;) {
+                            var heightOfNewLine = Math.sin(degToRad(i)) * radius;
+                            var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
+                            latLines.push({x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle});
+                            latLines.push({x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre - heightOfNewLine, y2: centre - heightOfNewLine, style: lineStyle});
+                            i = i + lineIncrementInDegrees;
+                        }
     
-    // draw on screen
-    $scope.lonRings = lonRings;
-    $scope.latLines = latLines;
-}
+                        // draw on screen
+                        $scope.lonRings = lonRings;
+                        $scope.latLines = latLines;
+                    }
+        
+                    $scope.drawLocationBox = function(latDeg, lonDeg) {
+    
+                        // scrape necessary calculation values
+                        var centre = $scope.centre;
+                        var radius = $scope.radius;
+                        var flip = $scope.flip;
+                        var squareside = $scope.squareside;
+                        var rotation = $scope.rotation;
+    
+                        // rotate
+    
+                        while (rotation < 0) {
+                            rotation += 360;
+                        }
+                        while (rotation >= 360) {
+                            rotation -= 360;
+                        }
+                        $scope.yellowclip = 'url(#right-prime-meridian)';
+                        $scope.greyclip = 'url(#left-prime-meridian)';
+                        if (flip) {
+                            if (rotation > 90 && rotation <= 270) {
+                                rotation += 180;
+                                $scope.yellowclip = 'url(#left-prime-meridian)';
+                                $scope.greyclip = 'url(#right-prime-meridian)';
+                            }
+                        }
+                        if (rotation >= 360) {
+                            rotation -= 360;
+                        }
+                        lonDeg = lonDeg + rotation;
+    
+                        // convert to radians
+                        var latRad = degToRad(latDeg);
+                        var lonRad = degToRad(lonDeg);
+    
+                        // calculate position of box
+                        var coordY = Math.sin(latRad) * radius;
+                        var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY)
+                        var coordX = Math.sin(lonRad) * radiusOfLineAtY;
+    
+                        // draw on screen
+                        var style = "fill: red;"
+    
+                        // hide if behind planet
+                        if (!flip && (rotation > 90 && rotation <= 270)) {
+                            style = "fill: none;"
+                        }
+                        $scope.locationBox = {
+                            x: (centre - squareside/2) + coordX,
+                            y: (centre - squareside/2) - coordY,
+                            width: squareside,
+                            height: squareside,
+                            style: style
+                        }
+                    }
+        
 
-function drawLocationBox(latDeg, lonDeg, $scope) {
+                    $scope.calculateSeasonalEffect = function(latDeg, tiltDeg) {
+                        var radius = $scope.radius;
+                        var rotation = $scope.rotation;
+                        var flip = $scope.flip;
     
-    // scrape necessary calculation values
-    var centre = $scope.centre;
-    var radius = $scope.radius;
-    var flip = $scope.flip;
-    var squareside = $scope.squareside;
-    var rotation = $scope.rotation;
-    
-    // rotate
-    
-    while (rotation < 0) {
-        rotation += 360;
-    }
-    while (rotation >= 360) {
-        rotation -= 360;
-    }
-    $scope.yellowclip = 'url(#right-prime-meridian)';
-    $scope.greyclip = 'url(#left-prime-meridian)';
-    if (flip) {
-        if (rotation > 90 && rotation <= 270) {
-            rotation += 180;
-            $scope.yellowclip = 'url(#left-prime-meridian)';
-            $scope.greyclip = 'url(#right-prime-meridian)';
-        }
-    }
-    if (rotation >= 360) {
-        rotation -= 360;
-    }
-    lonDeg = lonDeg + rotation;
-    
-    // convert to radians
-    var latRad = degToRad(latDeg);
-    var lonRad = degToRad(lonDeg);
-    
-    // calculate position of box
-    var coordY = Math.sin(latRad) * radius;
-    var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY)
-    var coordX = Math.sin(lonRad) * radiusOfLineAtY;
-    
-    // draw on screen
-    var style = "fill: red;"
-    
-    // hide if behind planet
-    if (!flip && (rotation > 90 && rotation <= 270)) {
-        style = "fill: none;"
-    }
-    $scope.locationBox = {
-        x: (centre - squareside/2) + coordX,
-        y: (centre - squareside/2) - coordY,
-        width: squareside,
-        height: squareside,
-        style: style
-    }
-}
+                        // allow for planets with such large tilts they flip upside-down
+                        if (tiltDeg < -90) {
+                            tiltDeg += 180;
+                            latDeg = 0 - latDeg;
+                        }
+                        if (tiltDeg > 90) {
+                            tiltDeg -= 180;
+                            latDeg = 0 - latDeg;
+                        }
 
-function calculateSeasonalEffect(latDeg, tiltDeg, $scope) {
-    var radius = $scope.radius;
-    var rotation = $scope.rotation;
-    var flip = $scope.flip;
+                        var latRad = degToRad(latDeg);
+                        var coordY = Math.sin(latRad) * radius;
+                        var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY)
     
-    // allow for planets with such large tilts they flip upside-down
-    if (tiltDeg < -90) {
-        tiltDeg += 180;
-        latDeg = 0 - latDeg;
-    }
-    if (tiltDeg > 90) {
-        tiltDeg -= 180;
-        latDeg = 0 - latDeg;
-    }
+                        var tiltRad = degToRad(tiltDeg);
+                        var sineOfAngleLost = (coordY/radiusOfLineAtY) * Math.tan(tiltRad);
+                        var seasonalEffect;
+    
+                        if (sineOfAngleLost >= -1 && sineOfAngleLost <= 1) {
+                            var angleLost = Math.asin(sineOfAngleLost);
+                            seasonalEffect = angleLost / (Math.PI / 2);
+                        } else if (sineOfAngleLost > 1) {
+                            seasonalEffect = 2;
+                        } else if (sineOfAngleLost < -1) {
+                            seasonalEffect = -2;
+                        }
+    
+                        if (flip && (rotation > 90 && rotation <= 270)) {
+                            seasonalEffect = 0 - seasonalEffect;
+                        }
+    
+                        var seasonalEffectPrint = '';
+                        var sunrise = '';
+                        var sunset = '';
+                        if (seasonalEffect <= -1) {
+                            seasonalEffectPrint = 'Perpetual darkness';
+                        } else if (seasonalEffect >= 1) {
+                            seasonalEffectPrint = 'Midnight sun';
+                        } else {
+                            var rawSeasonalEffectHours = 12 + 12*seasonalEffect;
+                            var seasonalEffectHours = Math.round(10 * rawSeasonalEffectHours)/10;
+                            seasonalEffectPrint = seasonalEffectHours + ' hours of daylight';
+                            var sunriseHour = Math.floor(12 - rawSeasonalEffectHours / 2);
+                            var sunriseMin = Math.round(60 * (12 - rawSeasonalEffectHours / 2 - Math.floor(12 - rawSeasonalEffectHours / 2)));
+                            if (sunriseMin == 60) {
+                                sunriseHour++;
+                                sunriseMin = 0;
+                            }
+                            if (sunriseMin < 10) {
+                                sunriseMin = '0' + sunriseMin;
+                            }
+                            sunrise = 'Sunrise: ' + sunriseHour + ':' + sunriseMin + ' AM';
+                            var sunsetHour = Math.floor(rawSeasonalEffectHours / 2);
+                            var sunsetMin = Math.round(60 * (rawSeasonalEffectHours / 2 - Math.floor(rawSeasonalEffectHours / 2)));
+                            if (sunsetMin == 60) {
+                                sunsetHour++;
+                                sunsetMin = 0;
+                            }
+                            if (sunsetMin < 10) {
+                                sunsetMin = '0' + sunsetMin;
+                            }
+                            sunset = 'Sunset: ' + sunsetHour + ':' + sunsetMin + ' PM';
+                        }
+    
+                        $scope.seasonaleffectprint = seasonalEffectPrint;
+                        $scope.sunrise = sunrise;
+                        $scope.sunset = sunset;
+                    }
 
-    var latRad = degToRad(latDeg);
-    var coordY = Math.sin(latRad) * radius;
-    var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY)
+                    $scope.tick = function() {
+                        // work out correct rotation for the current time
+                        // to a silly degree of accuracy so that we can see the numbers move
+                        var d = $scope.date;
+                        var t = (d.getHours() + d.getMinutes()/60 + d.getSeconds()/(60*60) + d.getMilliseconds()/(60*60*1000))/24;
+                        var roundLevel = 1000;
+                        $scope.rotation = Math.round(roundLevel * (t*360 - 90))/roundLevel;
     
-    var tiltRad = degToRad(tiltDeg);
-    var sineOfAngleLost = (coordY/radiusOfLineAtY) * Math.tan(tiltRad);
-    var seasonalEffect;
+                        // work out axial tilt for faking revolution around sun
+                        // solstices are estimated at midnight on the 21st of the month,
+                        // I may come back and put an algorithm for this in later
+                        var dpy = $scope.dpy;
+                        var ypy = $scope.ypy;
+                        var flip = $scope.flip;
+                        const earthDays = 365.26;
+                        var dayRatio = dpy/earthDays;
     
-    if (sineOfAngleLost >= -1 && sineOfAngleLost <= 1) {
-        var angleLost = Math.asin(sineOfAngleLost);
-        seasonalEffect = angleLost / (Math.PI / 2);
-    } else if (sineOfAngleLost > 1) {
-        seasonalEffect = 2;
-    } else if (sineOfAngleLost < -1) {
-        seasonalEffect = -2;
-    }
+                        const solstices = [dayRatio * 80.26/earthDays, dayRatio * 172.26/earthDays, dayRatio * 264.26/earthDays, dayRatio * 355.26/earthDays];
     
-    if (flip && (rotation > 90 && rotation <= 270)) {
-        seasonalEffect = 0 - seasonalEffect;
-    }
+                        var start = new Date(d.getFullYear(), 0, 0);
+                        var maxtilt = $scope.maxtilt;
+                        var diff = d - start;
+                        var oneEarthDay = 1000 * 60 * 60 * 24;
+                        var oneEarthYear = oneEarthDay * earthDays;
+                        var oneSpaceYear = oneEarthYear * ypy;
+                        var oneDay = oneSpaceYear / dpy;
+                        var partYear = (Math.floor(diff / oneDay) + t)/dpy;
     
-    var seasonalEffectPrint = '';
-    var sunrise = '';
-    var sunset = '';
-    if (seasonalEffect <= -1) {
-        seasonalEffectPrint = 'Perpetual darkness';
-    } else if (seasonalEffect >= 1) {
-        seasonalEffectPrint = 'Midnight sun';
-    } else {
-        var rawSeasonalEffectHours = 12 + 12*seasonalEffect;
-        var seasonalEffectHours = Math.round(10 * rawSeasonalEffectHours)/10;
-        seasonalEffectPrint = seasonalEffectHours + ' hours of daylight';
-        var sunriseHour = Math.floor(12 - rawSeasonalEffectHours / 2);
-        var sunriseMin = Math.round(60 * (12 - rawSeasonalEffectHours / 2 - Math.floor(12 - rawSeasonalEffectHours / 2)));
-        if (sunriseMin == 60) {
-            sunriseHour++;
-            sunriseMin = 0;
-        }
-        if (sunriseMin < 10) {
-            sunriseMin = '0' + sunriseMin;
-        }
-        sunrise = 'Sunrise: ' + sunriseHour + ':' + sunriseMin + ' AM';
-        var sunsetHour = Math.floor(rawSeasonalEffectHours / 2);
-        var sunsetMin = Math.round(60 * (rawSeasonalEffectHours / 2 - Math.floor(rawSeasonalEffectHours / 2)));
-        if (sunsetMin == 60) {
-            sunsetHour++;
-            sunsetMin = 0;
-        }
-        if (sunsetMin < 10) {
-            sunsetMin = '0' + sunsetMin;
-        }
-        sunset = 'Sunset: ' + sunsetHour + ':' + sunsetMin + ' PM';
-    }
-    
-    $scope.seasonaleffectprint = seasonalEffectPrint;
-    $scope.sunrise = sunrise;
-    $scope.sunset = sunset;
-}
+                        // need to take into account last 10 days of Dec after solstice
+                        if (partYear < solstices[3]) {
+                            var adjustedPartYear = (1 - solstices[3]) + partYear;
+                        } else {
+                            var adjustedPartYear = partYear - solstices[3];
+                        }
 
-function tick($scope) {
-    // work out correct rotation for the current time
-    // to a silly degree of accuracy so that we can see the numbers move
-    var d = $scope.date;
-    var t = (d.getHours() + d.getMinutes()/60 + d.getSeconds()/(60*60) + d.getMilliseconds()/(60*60*1000))/24;
-    var roundLevel = 1000;
-    $scope.rotation = Math.round(roundLevel * (t*360 - 90))/roundLevel;
+                        var roundFactor = 1000000;
+                        $scope.adjustedpartyear = Math.round(adjustedPartYear * 100 * roundFactor) / roundFactor;
     
-    // work out axial tilt for faking revolution around sun
-    // solstices are estimated at midnight on the 21st of the month,
-    // I may come back and put an algorithm for this in later
-    var dpy = $scope.dpy;
-    var ypy = $scope.ypy;
-    var flip = $scope.flip;
-    const earthDays = 365.26;
-    var dayRatio = dpy/earthDays;
+                        // the -90degree adjustment is because the year doesn't start in March
+                        var axialTilt = Math.sin((adjustedPartYear - 1/4) * (2 * Math.PI)) * maxtilt
     
-    const solstices = [dayRatio * 80.26/earthDays, dayRatio * 172.26/earthDays, dayRatio * 264.26/earthDays, dayRatio * 355.26/earthDays];
+                        if (flip && ($scope.rotation > 90 && $scope.rotation <= 270)) {
+                            axialTilt = 0 - axialTilt
+                        }
     
-    var start = new Date(d.getFullYear(), 0, 0);
-    var maxtilt = $scope.maxtilt;
-    var diff = d - start;
-    var oneEarthDay = 1000 * 60 * 60 * 24;
-    var oneEarthYear = oneEarthDay * earthDays;
-    var oneSpaceYear = oneEarthYear * ypy;
-    var oneDay = oneSpaceYear / dpy;
-    var partYear = (Math.floor(diff / oneDay) + t)/dpy;
-    
-    // need to take into account last 10 days of Dec after solstice
-    if (partYear < solstices[3]) {
-        var adjustedPartYear = (1 - solstices[3]) + partYear;
-    } else {
-        var adjustedPartYear = partYear - solstices[3];
-    }
+                        var roundFactor = 1000000;
+                        $scope.axialtilt = Math.round(roundFactor*axialTilt)/roundFactor;
+                    }
 
-    var roundFactor = 1000000;
-    $scope.adjustedpartyear = Math.round(adjustedPartYear * 100 * roundFactor) / roundFactor;
+                    $scope.changeClockSpeed = function(timefactor, justReset, $interval) {
+                        if (!justReset) {
+                            $interval.cancel($scope.ticking);
+                        }
+                        // pause
+                        if (timefactor == 0) {
+                            return;
+                        }
+                        // reset clock
+                        if (timefactor == -1) {
+                            $scope.$advance = 0;
+                            $scope.changeClockSpeed(1, true, $interval);
+                            return;
+                        }
     
-    // the -90degree adjustment is because the year doesn't start in March
-    var axialTilt = Math.sin((adjustedPartYear - 1/4) * (2 * Math.PI)) * maxtilt
-    
-    if (flip && ($scope.rotation > 90 && $scope.rotation <= 270)) {
-        axialTilt = 0 - axialTilt
-    }
-    
-    var roundFactor = 1000000;
-    $scope.axialtilt = Math.round(roundFactor*axialTilt)/roundFactor;
-}
+                        var FPS = 60;
+                        // start clock
+                        if (timefactor == 1) {
+                            $scope.ticking = $interval(function() {
+                                var d = new Date();
+                                $scope.date = new Date(d);
+                                $scope.date.setSeconds($scope.date.getSeconds() + $scope.$advance);
+                                $scope.tick();
+                            }, 1000/FPS);
+                            return;
+                        }
+                        // or start pseudo-clock
+                        // the reason we need a special synchronised case for 1-second-per-second
+                        // is that people notice if that case is broken
+                        $scope.ticking = $interval(function() {
+                            var d = new Date();
+                            $scope.date = new Date(d);
+                            $scope.date.setSeconds($scope.date.getSeconds() + $scope.$advance);
+                            $scope.tick();
+                            $scope.$advance += timefactor/FPS;
+                        }, 1000/FPS);
+                    }
 
-function changeClockSpeed(timefactor, justReset, $scope, $interval) {
-    if (!justReset) {
-        $interval.cancel($scope.ticking);
-    }
-    // pause
-    if (timefactor == 0) {
-        return;
-    }
-    // reset clock
-    if (timefactor == -1) {
-        $scope.$advance = 0;
-        changeClockSpeed(1, true, $scope, $interval);
-        return;
-    }
-    
-    var FPS = 60;
-    // start clock
-    if (timefactor == 1) {
-        $scope.ticking = $interval(function() {
-            var d = new Date();
-            $scope.date = new Date(d);
-            $scope.date.setSeconds($scope.date.getSeconds() + $scope.$advance);
-            tick($scope);
-        }, 1000/FPS);
-        return;
-    }
-    // or start pseudo-clock
-    // the reason we need a special synchronised case for 1-second-per-second
-    // is that people notice if that case is broken
-    $scope.ticking = $interval(function() {
-        var d = new Date();
-        $scope.date = new Date(d);
-        $scope.date.setSeconds($scope.date.getSeconds() + $scope.$advance);
-        tick($scope);
-        $scope.$advance += timefactor/FPS;
-    }, 1000/FPS);
-}
 
-function drawGlobeDirective() {
-    var template = '';
-    template += '<svg width="{{boxside}}" height="{{boxside}}">';
-    template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
-    template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
-    template += '<line ng-repeat="line in latLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
-    template += '<ellipse ng-repeat="ring in lonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
-    template += '<rect x="{{locationBox.x}}" y="{{locationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{locationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
-    template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{yellowclip}}" style="fill:yellow;fill-opacity:25%"></ellipse>';
-    template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{greyclip}}" style="fill:darkgrey;fill-opacity:25%"></ellipse>';
-    template += '</svg>';
-    return {
-        template: template
-    };
-}
-
-function displayLocationDirective() {
-    return {
-        template: '({{latitude}}, {{longitude}})'
-    };
-}
-
-function displaySeasonalEffectDirective() {
-    return {
-        template: '{{seasonaleffectprint}}<br/>{{sunrise}}&nbsp;<br/>{{sunset}}&nbsp;'
-    };
-}
-
-function displayDateDirective() {
-    return {
-        template: '{{date.toDateString()}}, {{date.toLocaleTimeString()}}'
-    };
-}
-
-function displayPartYearDirective() {
-    return {
-        template: '{{adjustedpartyear}} % of year passed since winter solstice'
-    };
-}
-
-(function(angular) {
-    'use strict';
-    angular
-    .module('sundial', [])
-    
-        .controller('sundialController', function($scope, $interval) {
+                    // set fixed drawing parameters
+                    $scope.squareside = 2;
+                    $scope.boxside = 500;
+                    $scope.centre = $scope.boxside / 2;
+                    $scope.radius = ($scope.boxside / 2) * 0.9;
+            
+                    // watch inputs
+                    $scope.$watchGroup(['latitude','longitude','rotation'], function(newValues, oldValues, $scope) {
+                        $scope.drawLineSet($scope.lines, newValues[2]);
+                        $scope.drawLocationBox(newValues[0], newValues[1]);
+                    });
+            
+                    // watch inputs
+                    $scope.$watchGroup(['latitude','axialtilt'], function(newValues, oldValues, $scope) {
+                        $scope.calculateSeasonalEffect(newValues[0], newValues[1]);
+                    });
+            
+                    // watch inputs
+                    $scope.$watch('earth', function(newValue, oldValue, $scope) {
+                        if (newValue == true) {
+                            $scope.maxtilt = 23.4;
+                            $scope.dpy = 365.26;
+                            $scope.ypy = 1;
+                        }
+                    });
          
-            // set fixed drawing parameters
-            $scope.squareside = 2;
-            $scope.boxside = 500;
-            $scope.centre = $scope.boxside / 2;
-            $scope.radius = ($scope.boxside / 2) * 0.9;
-            
-            // watch inputs
-            $scope.$watchGroup(['latitude','longitude','rotation'], function(newValues, oldValues, $scope) {
-                drawLineSet($scope.lines, newValues[2], $scope);
-                drawLocationBox(newValues[0], newValues[1], $scope);
-            });
-            
-            // watch inputs
-            $scope.$watchGroup(['latitude','axialtilt'], function(newValues, oldValues, $scope) {
-                calculateSeasonalEffect(newValues[0], newValues[1], $scope);
-            });
-            
-            // watch inputs
-            $scope.$watch('earth', function(newValue, oldValue, $scope) {
-                if (newValue == true) {
-                    $scope.maxtilt = 23.4;
-                    $scope.dpy = 365.26;
-                    $scope.ypy = 1;
-                }
-            });
-         
-            // draw initial line set
-            $scope.lines = 6;
+                    // draw initial line set
+                    $scope.lines = 6;
 
-            // locate user
-            $scope.setLocation = function(position) {
-                $scope.$apply(function() {
-                    $scope.latitude = position.coords.latitude;
-                    $scope.longitude = position.coords.longitude;
-                });
-            }
-            $scope.defaultLocation = function(position) {
-                // London
-                $scope.$apply(function() {
-                    $scope.latitude = 51.5072;
-                    $scope.longitude = 0;
-                });
-            }
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, { enableHighAccuracy: true })
-            } else {
-                alert("Turn geolocation on.")
-            }
+                    // locate user
+                    $scope.setLocation = function(position) {
+                        $scope.$apply(function() {
+                            $scope.latitude = position.coords.latitude;
+                            $scope.longitude = position.coords.longitude;
+                        });
+                    }
+                    $scope.defaultLocation = function(position) {
+                        // London
+                        $scope.$apply(function() {
+                            $scope.latitude = 51.5072;
+                            $scope.longitude = 0;
+                        });
+                    }
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, { enableHighAccuracy: true })
+                    } else {
+                        alert("Turn geolocation on.")
+                    }
             
-            $scope.ticking = undefined;
+                    $scope.ticking = undefined;
             
-            // watch time factor
-            $scope.$watch('timefactor', function(newValue, oldValue, $scope) {
-                changeClockSpeed(newValue, false, $scope, $interval);
-            });
+                    // watch time factor
+                    $scope.$watch('timefactor', function(newValue, oldValue, $scope) {
+                        $scope.changeClockSpeed(newValue, false, $interval);
+                    });
             
-            // initialise view
-            $scope.$advance = 0;
-            $scope.timefactor = 1;
-            $scope.earth = true;
-            $scope.flip = true;
-            $scope.date = new Date();
-            tick($scope);
-        })
+                    // initialise view
+                    $scope.$advance = 0;
+                    $scope.timefactor = 1;
+                    $scope.earth = true;
+                    $scope.flip = true;
+                    $scope.date = new Date();
+                    $scope.tick();
+                })
         
-        .directive('drawGlobe', drawGlobeDirective)
-        .directive('displayLocation', displayLocationDirective)
-        .directive('displaySeasonalEffect', displaySeasonalEffectDirective)
-        .directive('displayPartYear', displayPartYearDirective)
-        .directive('displayDate', displayDateDirective)
-        ;
-})(window.angular);
+                .directive('drawGlobe', drawGlobeDirective)
+                .directive('displayLocation', displayLocationDirective)
+                .directive('displaySeasonalEffect', displaySeasonalEffectDirective)
+                .directive('displayPartYear', displayPartYearDirective)
+                .directive('displayDate', displayDateDirective)
+            ;
+        })(window.angular);
 
-</script>
+    </script>
 </head>
 
 <body ng-app="sundial">
 
-<div ng-controller="sundialController">
+    <div ng-controller="sundialController">
 
-<div draw-globe></div>
-<input type="checkbox" ng-model="earth"> Earth <input type="checkbox" ng-model="flip"> Flip to show location<br />
-<p>True axial tilt in degrees : <input ng-readonly="earth" type="number" ng-model="maxtilt">, rotations per revolution : <input ng-readonly="earth" type="number" ng-model="dpy">, revolutions per Earth year : <input ng-readonly="earth" type="number" ng-model="ypy"></p>
-1 second =<br/>
-<button ng-click="timefactor = 0">Pause</button>
-<button ng-click="timefactor = 1">1 second</button>
-<button ng-click="timefactor = 60">1 minute</button>
-<button ng-click="timefactor = 3600">1 hour</button>
-<button ng-click="timefactor = 86400">1 day</button>
-<button ng-click="timefactor = 604800">1 week</button>
-<button ng-click="timefactor = 2626560">1 month</button>
-<br/><br/>
-<p>Time shown: <span ng-show="earth" display-date><span display-part-year></span><br /></p> 
-<p><button ng-click="timefactor = -1; earth = true; flip = true;">Reset</button></p>
-<p>Location: <span display-location></span></p>
-<p>Seasonal effect: <span display-seasonal-effect></span></p>
- 
-<p>Latitude : <input type="number" ng-model="latitude"></p>
-<p>Longitude : <input type="number" ng-model="longitude"></p>
-<p>Rotation : <input readonly type="number" ng-model="rotation"></p>
-<p>Tilt : <input readonly type="number" ng-model="axialtilt"></p>
+        <div draw-globe></div>
+        <input type="checkbox" ng-model="earth">
+        Earth
+        <input type="checkbox" ng-model="flip">
+        Flip to show location<br />
+        <p>True axial tilt in degrees :
+            <input ng-readonly="earth" type="number" ng-model="maxtilt">, rotations per revolution :
+            <input ng-readonly="earth" type="number" ng-model="dpy">, revolutions per Earth year :
+            <input ng-readonly="earth" type="number" ng-model="ypy"></p>
+        1 second =<br />
+        <button ng-click="timefactor = 0">Pause</button>
+        <button ng-click="timefactor = 1">1 second</button>
+        <button ng-click="timefactor = 60">1 minute</button>
+        <button ng-click="timefactor = 3600">1 hour</button>
+        <button ng-click="timefactor = 86400">1 day</button>
+        <button ng-click="timefactor = 604800">1 week</button>
+        <button ng-click="timefactor = 2626560">1 month</button>
+        <br />
+        <br />
+        <p>Time shown: <span ng-show="earth" display-date><span display-part-year></span>
+            <br /></p>
+        <p>
+            <button ng-click="timefactor = -1; earth = true; flip = true;">Reset</button></p>
+        <p>Location: <span display-location></span></p>
+        <p>Seasonal effect: <span display-seasonal-effect></span></p>
 
-</div>
+        <p>Latitude :
+            <input type="number" ng-model="latitude"></p>
+        <p>Longitude :
+            <input type="number" ng-model="longitude"></p>
+        <p>Rotation :
+            <input readonly type="number" ng-model="rotation"></p>
+        <p>Tilt :
+            <input readonly type="number" ng-model="axialtilt"></p>
+
+    </div>
 
 </body>
 </html>
