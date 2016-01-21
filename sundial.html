@@ -9,11 +9,29 @@
             return (deg / 360) * (2 * Math.PI);
         }
 
+        function drawOtherGlobeDirective() {
+            var template = '';
+            template += '<svg width="{{boxside}}" height="{{boxside}}">';
+            template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
+            template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
+            template += '<line ng-repeat="line in otherlatLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
+            template += '<ellipse ng-repeat="ring in otherlonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
+            template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusleft}}" ry="{{radius}}" clip-path="url(#right-prime-meridian)" style="fill:{{mover}};fill-opacity:25%" ></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusright}}" ry="{{radius}}" clip-path="url(#left-prime-meridian)" style="fill:{{mover}};fill-opacity:25%" ></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" style="fill:white;fill-opacity:25%" ></ellipse>';
+            template += '</svg>';
+            return {
+                template: template
+            };
+        }
+
         function drawGlobeDirective() {
             var template = '';
             template += '<svg width="{{boxside}}" height="{{boxside}}">';
             template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
             template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
+            template += '<line ng-repeat="line in latLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
             template += '<line ng-repeat="line in latLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
             template += '<ellipse ng-repeat="ring in lonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
             template += '<rect x="{{locationBox.x}}" y="{{locationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{locationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
@@ -58,12 +76,131 @@
     
                 .controller('sundialController', function($scope, $interval) {
         
-                    $scope.drawLineSet = function(lines, rotation) {
+                    $scope.drawOtherLineSet = function(rotation) {
 
                         // scrape necessary calculation values
                         var centre = $scope.centre;
                         var radius = $scope.radius;
                         var flip = $scope.flip;
+                        var lines = $scope.lines;
+                        
+                        var realtime = rotation;
+                        var rotation = -$scope.longitude;
+    
+                        // avoids infinite loop when drawing
+                        if (lines < 1) {
+                            lines = 1;
+                        }
+    
+                        // sets sensible minimum interval of 1 degree
+                        if (lines > 90) {
+                            lines = 90;
+                        }
+                        
+                        var equatorStyle = 'stroke:darkgrey;stroke-width:1;fill:none;';
+                        var lineStyle = 'stroke:lightgrey; stroke-width:1;fill:none;';
+                        var meridianStyle = 'stroke:green;stroke-width:1;fill:none;';
+    
+                        // calculate positions of lines
+                        var lineIncrementInDegrees = 90 / lines;
+                        var lonRings = [];
+                        var latLines = [];
+    
+                        // locate prime meridian
+    
+                        var meridianRotation = rotation;
+    
+                        if (meridianRotation > 90 && meridianRotation <= 270) {
+                            meridianStyle = 'stroke:red;stroke-width:1;fill:none;';
+                            meridianRotation = 0 - meridianRotation;
+                        }
+    
+                        var radiusOfNewEllipse = Math.sin(degToRad(meridianRotation)) * radius;    
+                        if (radiusOfNewEllipse > 0) {
+                            lonRings.push({cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'right-prime-meridian'});
+                        } else if (radiusOfNewEllipse < 0) {
+                            lonRings.push({cx: centre, cy: centre, rx: 0-radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'left-prime-meridian'});
+                        } else if (rotation == 0) {
+                            lonRings.push({cx: centre, cy: centre, rx: 1, ry: radius, style: meridianStyle, meridian: 'left-prime-meridian'});
+                        }
+    
+                        // rotation mod gap
+                        while (rotation > lineIncrementInDegrees) {
+                            rotation -= lineIncrementInDegrees;
+                        }
+                        // sin(90) = 1
+                        rotation += 90;
+                        // locate rotating rings
+                        for (var i=lineIncrementInDegrees; i<360;) {
+                            var radiusOfNewEllipse = Math.sin(degToRad(i + rotation)) * radius;
+        
+                            if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
+                                lonRings.push({cx: centre, cy: centre, rx: 0-radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'right-prime-meridian'});
+                            } else if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse > 0) {
+                                lonRings.push({cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'left-prime-meridian'});
+                            } else if (i + rotation > 90 && i + rotation <= 270) {
+                                lonRings.push({cx: centre, cy: centre, rx: 1, ry: radius, style: lineStyle, meridian: 'left-prime-meridian'});
+                            }
+        
+                            i = i + lineIncrementInDegrees;
+                        }
+    
+                        // locate latitude parallels
+                        latLines = [{x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle}];
+                        for (var i=lineIncrementInDegrees; i<90;) {
+                            var heightOfNewLine = Math.sin(degToRad(i)) * radius;
+                            var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
+                            latLines.push({x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle});
+                            latLines.push({x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre - heightOfNewLine, y2: centre - heightOfNewLine, style: lineStyle});
+                            i = i + lineIncrementInDegrees;
+                        }
+    
+                        // draw on screen
+                        $scope.otherlonRings = lonRings;
+                        $scope.otherlatLines = latLines;
+                        
+                        // draw sun circle
+                        
+                        $scope.moverradiusleft = 0;
+                        $scope.moverradiusright = 0;
+                        
+                        // 90 degrees is noon
+                        var minorhalf = Math.cos(degToRad(realtime - 90)) * radius;
+                        
+                        if (realtime < 0) {
+                            realtime += 360;
+                        }
+                        
+                        if (realtime < 90) {
+                            // morning
+                            $scope.mover = "yellow";
+                            $scope.moverradiusleft = radius;
+                            $scope.moverradiusright = minorhalf;
+                        } else if (realtime < 180) {
+                            // afternoon
+                            $scope.mover = "yellow";
+                            $scope.moverradiusleft = minorhalf;
+                            $scope.moverradiusright = radius;
+                        } else if (realtime < 270) {
+                            // evening
+                            $scope.mover = "darkgrey";
+                            $scope.moverradiusleft = radius;
+                            $scope.moverradiusright = 0 - minorhalf;
+                        } else if (realtime < 360) {
+                            // night
+                            $scope.mover = "darkgrey";
+                            $scope.moverradiusleft = 0 - minorhalf;
+                            $scope.moverradiusright = radius;
+                        }
+                    }
+        
+                    $scope.drawLineSet = function(rotation) {
+
+                        // scrape necessary calculation values
+                        var centre = $scope.centre;
+                        var radius = $scope.radius;
+                        var flip = $scope.flip;
+                        var lines = $scope.lines;
     
                         // avoids infinite loop when drawing
                         if (lines < 1) {
@@ -152,6 +289,61 @@
                         $scope.lonRings = lonRings;
                         $scope.latLines = latLines;
                     }
+        
+                    $scope.drawOtherLocationBox = function(latDeg, lonDeg) {
+    
+                        // scrape necessary calculation values
+                        var centre = $scope.centre;
+                        var radius = $scope.radius;
+                        var flip = $scope.flip;
+                        var squareside = $scope.squareside;
+                        var rotation = 0;
+    
+                        // rotate
+    
+                        while (rotation < 0) {
+                            rotation += 360;
+                        }
+                        while (rotation >= 360) {
+                            rotation -= 360;
+                        }
+                        if (flip) {
+                            if (rotation > 90 && rotation <= 270) {
+                                rotation += 180;
+                            }
+                        }
+                        if (rotation >= 360) {
+                            rotation -= 360;
+                        }
+                        
+                        lonDeg = 0;
+    
+                        // convert to radians
+                        var latRad = degToRad(latDeg);
+                        var lonRad = degToRad(lonDeg);
+    
+                        // calculate position of box
+                        var coordY = Math.sin(latRad) * radius;
+                        var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY)
+                        var coordX = Math.sin(lonRad) * radiusOfLineAtY;
+    
+                        // draw on screen
+                        var style = "fill: red;"
+    
+                        // hide if behind planet
+                        if (!flip && (rotation > 90 && rotation <= 270)) {
+                            style = "fill: none;"
+                        }
+                        $scope.otherlocationBox = {
+                            x: (centre - squareside/2) + coordX,
+                            y: (centre - squareside/2) - coordY,
+                            width: squareside,
+                            height: squareside,
+                            style: style
+                        }
+                    }
+                    
+                    
         
                     $scope.drawLocationBox = function(latDeg, lonDeg) {
     
@@ -380,8 +572,10 @@
             
                     // watch inputs
                     $scope.$watchGroup(['latitude','longitude','rotation'], function(newValues, oldValues, $scope) {
-                        $scope.drawLineSet($scope.lines, newValues[2]);
+                        $scope.drawLineSet(newValues[2]);
+                        $scope.drawOtherLineSet(newValues[2]);
                         $scope.drawLocationBox(newValues[0], newValues[1]);
+                        $scope.drawOtherLocationBox(newValues[0], newValues[1]);
                     });
             
                     // watch inputs
@@ -438,6 +632,7 @@
                 })
         
                 .directive('drawGlobe', drawGlobeDirective)
+                .directive('drawOtherGlobe', drawOtherGlobeDirective)
                 .directive('displayLocation', displayLocationDirective)
                 .directive('displaySeasonalEffect', displaySeasonalEffectDirective)
                 .directive('displayPartYear', displayPartYearDirective)
@@ -452,6 +647,7 @@
 
     <div ng-controller="sundialController">
 
+        <div draw-other-globe></div>
         <div draw-globe></div>
         <input type="checkbox" ng-model="earth">
         Earth
