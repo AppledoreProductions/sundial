@@ -12,11 +12,28 @@
         function drawOtherGlobeDirective() {
             var template = '';
             template += '<svg width="{{boxside}}" height="{{boxside}}">';
-            template += '<clipPath id="top-equator"><rect x="0" y="0" width="{{boxside}}" height="{{boxside / 2}}" ></rect></clipPath>';
-            template += '<clipPath id="bottom-equator"><rect x="0" y="{{boxside / 2}}" width="{{boxside}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            template += '<clipPath id="top-left"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            template += '<clipPath id="top-right"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            template += '<clipPath id="bottom-left"><rect x="0" y="{{boxside / 2}}" width="{{boxside / 2}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            template += '<clipPath id="bottom-right"><rect x="{{boxside / 2}}" y="{{boxside / 2}}" width="{{boxside / 2}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            // grey background circle
             template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" style="fill:dimgrey;fill-opacity:100%" ></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{topwidth}}" ry="{{topheight}}" clip-path="url(#top-equator)" style="fill:lemonchiffon;fill-opacity:100%" ></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{bottomwidth}}" ry="{{bottomheight}}" clip-path="url(#bottom-equator)" style="fill:lemonchiffon;fill-opacity:100%" ></ellipse>';
+            // top left yellow
+            template += '<ellipse cx="{{topleft.cx}}" cy="{{topleft.cy}}" rx="{{topleft.rx}}" ry="{{topleft.ry}}" style="fill:lemonchiffon;fill-opacity:100%" clip-path="url(#top-left)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // top left grey
+            template += '<ellipse cx="{{topleftblock.cx}}" cy="{{topleftblock.cy}}" rx="{{topleftblock.rx}}" ry="{{topleftblock.ry}}" style="fill:dimgrey;fill-opacity:100%" clip-path="url(#top-left)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // top right yellow
+            template += '<ellipse cx="{{topright.cx}}" cy="{{topright.cy}}" rx="{{topright.rx}}" ry="{{topright.ry}}" style="fill:lemonchiffon;fill-opacity:100%" clip-path="url(#top-right)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // top right grey
+            template += '<ellipse cx="{{toprightblock.cx}}" cy="{{toprightblock.cy}}" rx="{{toprightblock.rx}}" ry="{{toprightblock.ry}}" style="fill:dimgrey;fill-opacity:100%" clip-path="url(#top-right)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // bottom left yellow
+            template += '<ellipse cx="{{bottomleft.cx}}" cy="{{bottomleft.cy}}" rx="{{bottomleft.rx}}" ry="{{bottomleft.ry}}" style="fill:lemonchiffon;fill-opacity:100%" clip-path="url(#bottom-left)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // bottom left grey
+            template += '<ellipse cx="{{bottomleftblock.cx}}" cy="{{bottomleftblock.cy}}" rx="{{bottomleftblock.rx}}" ry="{{bottomleftblock.ry}}" style="fill:dimgrey;fill-opacity:100%" clip-path="url(#bottom-left)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // bottom right yellow
+            template += '<ellipse cx="{{bottomright.cx}}" cy="{{bottomright.cy}}" rx="{{bottomright.rx}}" ry="{{bottomright.ry}}" style="fill:lemonchiffon;fill-opacity:100%" clip-path="url(#bottom-right)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
+            // bottom right grey
+            template += '<ellipse cx="{{bottomrightblock.cx}}" cy="{{bottomrightblock.cy}}" rx="{{bottomrightblock.rx}}" ry="{{bottomrightblock.ry}}" style="fill:dimgrey;fill-opacity:100%" clip-path="url(#bottom-right)" transform="rotate({{suntilt}} {{centre}} {{centre}})" ></ellipse>';
             template += '<line ng-repeat="line in otherlatLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}"></line>';
             template += '<ellipse ng-repeat="ring in otherlonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" ></ellipse>';
             template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" ></rect>';
@@ -161,19 +178,113 @@
                         
                         // draw sun circle
                         
-                        var tiltRad = degToRad($scope.axialtilt);
-                        var minorhalf = Math.cos(tiltRad)*radius;
+                        if (realtime < 0) {
+                            realtime += 360;
+                        }
                         
-                        if (tiltRad < 0) {
-                            $scope.topheight = minorhalf;
-                            $scope.bottomheight = radius;
-                            $scope.topwidth = radius;
-                            $scope.bottomwidth = radius;
+                        var tiltRad = degToRad($scope.axialtilt);
+                        var realtimeRad = degToRad(realtime);
+                        
+                        var minorhalf = Math.abs(Math.cos(tiltRad))*radius;
+                        
+                        // radius at arctic circle
+                        var arcticRadius = Math.sqrt(radius * radius - minorhalf * minorhalf);
+                        $scope.suntilt = 0;
+                        
+                        var topradius = radius;
+                        var bottomradius = radius;
+                        
+                        var winter = false;
+                        if (flip && (realtime > 90 && realtime <= 270)) {
+                            if (tiltRad > 0) {
+                                winter = true;
+                            }
                         } else {
-                            $scope.topheight = radius;
-                            $scope.bottomheight = minorhalf;
-                            $scope.topwidth = radius;
-                            $scope.bottomwidth = radius;
+                            if (tiltRad < 0) {
+                                winter = true;
+                            }
+                        }
+                        
+                        if (winter == true) {
+                            topradius = minorhalf;
+                        } else {
+                            bottomradius = minorhalf;
+                        }
+                        
+                        var leftradius;
+                        var rightradius;
+                        var leftblockradius;
+                        var rightblockradius;
+                        
+                        if (realtime < 90) {
+                            leftradius = radius;
+                            leftblockradius = 0;
+                            rightradius = (1 - Math.cos(realtimeRad))*radius;
+                            rightblockradius = 0;
+                        } else if (realtime < 180) {
+                            leftradius = (1 + Math.cos(realtimeRad))*radius;
+                            leftblockradius = 0;
+                            rightradius = radius;
+                            rightblockradius = 0;
+                        } else if (realtime < 270) {
+                            leftradius = 0;
+                            leftblockradius = 0;
+                            rightradius = radius;
+                            rightblockradius = (1 + Math.cos(realtimeRad))*radius;
+                        } else {
+                            leftradius = radius;
+                            leftblockradius = (1 - Math.cos(realtimeRad))*radius;
+                            rightradius = 0;
+                            rightblockradius = 0;
+                        }
+                        
+                        $scope.topleft = {
+                            cx: centre,
+                            cy: centre,
+                            rx: leftradius,
+                            ry: topradius
+                        }
+                        $scope.topright = {
+                            cx: centre,
+                            cy: centre,
+                            rx: rightradius,
+                            ry: topradius
+                        }
+                        $scope.bottomleft = {
+                            cx: centre,
+                            cy: centre,
+                            rx: leftradius,
+                            ry: bottomradius
+                        }
+                        $scope.bottomright = {
+                            cx: centre,
+                            cy: centre,
+                            rx: rightradius,
+                            ry: bottomradius
+                        }
+                        $scope.topleftblock = {
+                            cx: centre,
+                            cy: centre,
+                            rx: leftblockradius,
+                            ry: topradius
+                        }
+                        $scope.toprightblock = {
+                            cx: centre,
+                            cy: centre,
+                            rx: rightblockradius,
+                            ry: topradius
+                        }
+                        $scope.bottomleftblock = {
+                            cx: centre,
+                            cy: centre,
+                            rx: leftblockradius,
+                            ry: bottomradius
+                        }
+                        $scope.bottomrightblock = {
+                            cx: centre,
+                            cy: centre,
+                            rx: rightblockradius,
+                            ry: bottomradius
                         }
                     }
         
@@ -611,7 +722,7 @@
                     $scope.$advance = 0;
                     $scope.timefactor = 1;
                     $scope.earth = true;
-                    $scope.flip = false;
+                    $scope.flip = true;
                     $scope.date = new Date();
                     $scope.tick();
                 })
@@ -658,7 +769,7 @@
         <p>Time shown: <span ng-show="earth" display-date><span display-part-year></span>
             <br /></p>
         <p>
-            <button ng-click="timefactor = -1; earth = true; flip = false;">Reset</button></p>
+            <button ng-click="timefactor = -1; earth = true; flip = true;">Reset</button></p>
         <p>Location: <span display-location></span></p>
         <p>Seasonal effect: <span display-seasonal-effect></span></p>
 
