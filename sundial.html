@@ -12,11 +12,11 @@
         function drawOtherGlobeDirective() {
             var template = '';
             template += '<svg width="{{boxside}}" height="{{boxside}}">';
-            template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
-            template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" style="fill:{{notmover}};fill-opacity:100%" ></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusleft}}" ry="{{radius}}" clip-path="url(#right-prime-meridian)" style="fill:{{mover}};fill-opacity:100%" transform="rotate({{-axialtilt}} {{centre}} {{centre}})" ></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusright}}" ry="{{radius}}" clip-path="url(#left-prime-meridian)" style="fill:{{mover}};fill-opacity:100%" transform="rotate({{-axialtilt}} {{centre}} {{centre}})" ></ellipse>';
+            template += '<clipPath id="top-equator"><rect x="0" y="0" width="{{boxside}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            template += '<clipPath id="bottom-equator"><rect x="0" y="{{boxside / 2}}" width="{{boxside}}" height="{{boxside / 2}}" ></rect></clipPath>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" style="fill:dimgrey;fill-opacity:100%" ></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{topwidth}}" ry="{{topheight}}" clip-path="url(#top-equator)" style="fill:lemonchiffon;fill-opacity:100%" ></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{bottomwidth}}" ry="{{bottomheight}}" clip-path="url(#bottom-equator)" style="fill:lemonchiffon;fill-opacity:100%" ></ellipse>';
             template += '<line ng-repeat="line in otherlatLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}"></line>';
             template += '<ellipse ng-repeat="ring in otherlonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" ></ellipse>';
             template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" ></rect>';
@@ -161,40 +161,19 @@
                         
                         // draw sun circle
                         
-                        $scope.moverradiusleft = 0;
-                        $scope.moverradiusright = 0;
+                        var tiltRad = degToRad($scope.axialtilt);
+                        var minorhalf = Math.cos(tiltRad)*radius;
                         
-                        // 90 degrees is noon
-                        var minorhalf = Math.cos(degToRad(realtime - 90)) * radius;
-                        
-                        if (realtime < 0) {
-                            realtime += 360;
-                        }
-                        
-                        if (realtime < 90) {
-                            // morning
-                            $scope.mover = "lemonchiffon";
-                            $scope.notmover = "dimgrey";
-                            $scope.moverradiusleft = radius;
-                            $scope.moverradiusright = minorhalf;
-                        } else if (realtime < 180) {
-                            // afternoon
-                            $scope.mover = "lemonchiffon";
-                            $scope.notmover = "dimgrey";
-                            $scope.moverradiusleft = minorhalf;
-                            $scope.moverradiusright = radius;
-                        } else if (realtime < 270) {
-                            // evening
-                            $scope.mover = "dimgrey";
-                            $scope.notmover = "lemonchiffon";
-                            $scope.moverradiusleft = radius;
-                            $scope.moverradiusright = 0 - minorhalf;
-                        } else if (realtime < 360) {
-                            // night
-                            $scope.mover = "dimgrey";
-                            $scope.notmover = "lemonchiffon";
-                            $scope.moverradiusleft = 0 - minorhalf;
-                            $scope.moverradiusright = radius;
+                        if (tiltRad < 0) {
+                            $scope.topheight = minorhalf;
+                            $scope.bottomheight = radius;
+                            $scope.topwidth = radius;
+                            $scope.bottomwidth = radius;
+                        } else {
+                            $scope.topheight = radius;
+                            $scope.bottomheight = minorhalf;
+                            $scope.topwidth = radius;
+                            $scope.bottomwidth = radius;
                         }
                     }
         
