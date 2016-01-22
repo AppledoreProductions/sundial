@@ -15,11 +15,11 @@
             template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
             template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
             template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" style="fill:{{notmover}};fill-opacity:100%" ></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusleft}}" ry="{{radius}}" clip-path="url(#right-prime-meridian)" style="fill:{{mover}};fill-opacity:100%" ></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusright}}" ry="{{radius}}" clip-path="url(#left-prime-meridian)" style="fill:{{mover}};fill-opacity:100%" ></ellipse>';
-            template += '<line ng-repeat="line in otherlatLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
-            template += '<ellipse ng-repeat="ring in otherlonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
-            template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusleft}}" ry="{{radius}}" clip-path="url(#right-prime-meridian)" style="fill:{{mover}};fill-opacity:100%" transform="rotate({{-axialtilt}} {{centre}} {{centre}})" ></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{moverradiusright}}" ry="{{radius}}" clip-path="url(#left-prime-meridian)" style="fill:{{mover}};fill-opacity:100%" transform="rotate({{-axialtilt}} {{centre}} {{centre}})" ></ellipse>';
+            template += '<line ng-repeat="line in otherlatLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}"></line>';
+            template += '<ellipse ng-repeat="ring in otherlonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" ></ellipse>';
+            template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" ></rect>';
             template += '</svg>';
             return {
                 template: template
@@ -31,8 +31,8 @@
             template += '<svg width="{{boxside}}" height="{{boxside}}">';
             template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
             template += '<clipPath id="right-prime-meridian"><rect x="{{boxside / 2}}" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{yellowclip}}" style="fill:yellow;fill-opacity:100%"></ellipse>';
-            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{greyclip}}" style="fill:darkgrey;fill-opacity:100%"></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{yellowclip}}" style="fill:lemonchiffon;fill-opacity:100%"></ellipse>';
+            template += '<ellipse cx="{{centre}}" cy="{{centre}}" rx="{{radius}}" ry="{{radius}}" clip-path="{{greyclip}}" style="fill:dimgrey;fill-opacity:100%"></ellipse>';
             template += '<line ng-repeat="line in latLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
             template += '<line ng-repeat="line in latLines" x1="{{line.x1}}" x2="{{line.x2}}" y1="{{line.y1}}" y2="{{line.y2}}" style="{{line.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></line>';
             template += '<ellipse ng-repeat="ring in lonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
@@ -173,26 +173,26 @@
                         
                         if (realtime < 90) {
                             // morning
-                            $scope.mover = "yellow";
-                            $scope.notmover = "darkgrey";
+                            $scope.mover = "lemonchiffon";
+                            $scope.notmover = "dimgrey";
                             $scope.moverradiusleft = radius;
                             $scope.moverradiusright = minorhalf;
                         } else if (realtime < 180) {
                             // afternoon
-                            $scope.mover = "yellow";
-                            $scope.notmover = "darkgrey";
+                            $scope.mover = "lemonchiffon";
+                            $scope.notmover = "dimgrey";
                             $scope.moverradiusleft = minorhalf;
                             $scope.moverradiusright = radius;
                         } else if (realtime < 270) {
                             // evening
-                            $scope.mover = "darkgrey";
-                            $scope.notmover = "yellow";
+                            $scope.mover = "dimgrey";
+                            $scope.notmover = "lemonchiffon";
                             $scope.moverradiusleft = radius;
                             $scope.moverradiusright = 0 - minorhalf;
                         } else if (realtime < 360) {
                             // night
-                            $scope.mover = "darkgrey";
-                            $scope.notmover = "yellow";
+                            $scope.mover = "dimgrey";
+                            $scope.notmover = "lemonchiffon";
                             $scope.moverradiusleft = 0 - minorhalf;
                             $scope.moverradiusright = radius;
                         }
@@ -527,6 +527,8 @@
     
                         var roundFactor = 1000000;
                         $scope.axialtilt = Math.round(roundFactor*axialTilt)/roundFactor;
+                        
+                        $scope.absoluteaxialtilt = Math.abs($scope.axialtilt)
                     }
 
                     $scope.changeClockSpeed = function(timefactor, justReset, $interval) {
@@ -630,7 +632,7 @@
                     $scope.$advance = 0;
                     $scope.timefactor = 1;
                     $scope.earth = true;
-                    $scope.flip = true;
+                    $scope.flip = false;
                     $scope.date = new Date();
                     $scope.tick();
                 })
@@ -645,14 +647,17 @@
         })(window.angular);
 
     </script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 </head>
 
 <body ng-app="sundial">
 
     <div ng-controller="sundialController">
 
-        <div draw-other-globe></div>
-        <div draw-globe></div>
+        <div id="geo" style="float:left;"><div draw-other-globe></div></div>
+        <div id="helio" style="float:right;"><div draw-globe></div></div>
+        
         <input type="checkbox" ng-model="earth">
         Earth
         <input type="checkbox" ng-model="flip">
@@ -674,7 +679,7 @@
         <p>Time shown: <span ng-show="earth" display-date><span display-part-year></span>
             <br /></p>
         <p>
-            <button ng-click="timefactor = -1; earth = true; flip = true;">Reset</button></p>
+            <button ng-click="timefactor = -1; earth = true; flip = false;">Reset</button></p>
         <p>Location: <span display-location></span></p>
         <p>Seasonal effect: <span display-seasonal-effect></span></p>
 
