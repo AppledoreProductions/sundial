@@ -189,7 +189,17 @@
                         
                         // radius at arctic circle
                         var arcticRadius = Math.sqrt(radius * radius - minorhalf * minorhalf);
-                        $scope.suntilt = 0;
+                        
+                        // target location on radius
+                        var partArcticRadius = Math.cos(realtimeRad)*arcticRadius;
+                        var minorHalfAdjusted = Math.sqrt(minorhalf * minorhalf + partArcticRadius * partArcticRadius);
+                        var suntilt = Math.acos(minorhalf / minorHalfAdjusted) * (180 / Math.PI);
+                        if (realtime < 90 || realtime >= 270) {
+                          suntilt = 0 - suntilt;
+                        }
+                        
+                        
+                        $scope.suntilt = suntilt;
                         
                         var topradius = radius;
                         var bottomradius = radius;
@@ -206,9 +216,9 @@
                         }
                         
                         if (winter == true) {
-                            topradius = minorhalf;
+                            topradius = minorHalfAdjusted;
                         } else {
-                            bottomradius = minorhalf;
+                            bottomradius = minorHalfAdjusted;
                         }
                         
                         var leftradius;
