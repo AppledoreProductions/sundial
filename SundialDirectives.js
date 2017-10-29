@@ -1,4 +1,5 @@
-﻿
+﻿/* eslint-disable no-unused-vars */
+
 function drawOtherGlobeDirective() {
 	var template = '';
 	template += '<svg width="{{boxside}}" height="{{boxside}}">';
@@ -28,9 +29,7 @@ function drawOtherGlobeDirective() {
 	template += '<ellipse ng-repeat="ring in otherlonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" ></ellipse>';
 	template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" ></rect>';
 	template += '</svg>';
-	return {
-		template: template
-	};
+	return { template: template	};
 }
 
 function drawGlobeDirective() {
@@ -45,31 +44,21 @@ function drawGlobeDirective() {
 	template += '<ellipse ng-repeat="ring in lonRings" cx="{{ring.cx}}" cy="{{ring.cy}}" rx="{{ring.rx}}" ry="{{ring.ry}}" style="{{ring.style}}" clip-path="url(#{{ring.meridian}})" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></ellipse>';
 	template += '<rect x="{{locationBox.x}}" y="{{locationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{locationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
 	template += '</svg>';
-	return {
-		template: template
-	};
+	return { template: template	};
 }
 
 function displayLocationDirective() {
-	return {
-		template: '({{latitude}}, {{longitude}})'
-	};
+	return { template: '({{latitude}}, {{longitude}})' };
 }
 
 function displaySeasonalEffectDirective() {
-	return {
-		template: '{{seasonaleffectprint}}<br/>{{sunrise}}&nbsp;<br/>{{sunset}}&nbsp;'
-	};
+	return { template: '{{seasonaleffectprint}}<br/>{{sunrise}}&nbsp;<br/>{{sunset}}&nbsp;' };
 }
 
 function displayDateDirective() {
-	return {
-		template: '{{date.toDateString()}}, {{date.toLocaleTimeString()}}'
-	};
+	return { template: '{{date.toDateString()}}, {{date.toLocaleTimeString()}}' };
 }
 
 function displayPartYearDirective() {
-	return {
-		template: '{{adjustedpartyear}} % of year passed since winter solstice'
-	};
+	return { template: '{{adjustedpartyear}} % of year passed since winter solstice' };
 }
