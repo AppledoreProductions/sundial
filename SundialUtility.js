@@ -1,5 +1,7 @@
 ﻿var sdUtil = {};
 
-sdUtil.degToRad = function(deg) {
+sdUtil.degToRad = function (deg) {
 	return deg * 2 * Math.PI / 360;
 };
+
+window.sdUtil = sdUtil;
