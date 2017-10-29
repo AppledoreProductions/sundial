@@ -1,5 +1,5 @@
-﻿/* eslint-disable no-unused-vars */
+﻿var sdUtil = {};
 
-function degToRad(deg) {
+sdUtil.degToRad = function(deg) {
 	return deg * 2 * Math.PI / 360;
-}
+};

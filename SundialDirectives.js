@@ -1,6 +1,6 @@
-﻿/* eslint-disable no-unused-vars */
+﻿var sdDir = {};
 
-function drawOtherGlobeDirective() {
+sdDir.drawOtherGlobeDirective = function () {
 	var template = '';
 	template += '<svg width="{{boxside}}" height="{{boxside}}">';
 	template += '<clipPath id="top-left"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside / 2}}" ></rect></clipPath>';
@@ -30,9 +30,9 @@ function drawOtherGlobeDirective() {
 	template += '<rect x="{{otherlocationBox.x}}" y="{{otherlocationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{otherlocationBox.style}}" ></rect>';
 	template += '</svg>';
 	return { template: template	};
-}
+};
 
-function drawGlobeDirective() {
+sdDir.drawGlobeDirective = function () {
 	var template = '';
 	template += '<svg width="{{boxside}}" height="{{boxside}}">';
 	template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{boxside / 2}}" height="{{boxside}}" ></rect></clipPath>';
@@ -45,20 +45,20 @@ function drawGlobeDirective() {
 	template += '<rect x="{{locationBox.x}}" y="{{locationBox.y}}" width="{{squareside}}" height="{{squareside}}" style="{{locationBox.style}}" transform="rotate({{axialtilt}} {{centre}} {{centre}})" ></rect>';
 	template += '</svg>';
 	return { template: template	};
-}
+};
 
-function displayLocationDirective() {
+sdDir.displayLocationDirective = function () {
 	return { template: '({{latitude}}, {{longitude}})' };
-}
+};
 
-function displaySeasonalEffectDirective() {
+sdDir.displaySeasonalEffectDirective = function () {
 	return { template: '{{seasonaleffectprint}}<br/>{{sunrise}}&nbsp;<br/>{{sunset}}&nbsp;' };
-}
+};
 
-function displayDateDirective() {
+sdDir.displayDateDirective = function () {
 	return { template: '{{date.toDateString()}}, {{date.toLocaleTimeString()}}' };
-}
+};
 
-function displayPartYearDirective() {
+sdDir.displayPartYearDirective = function () {
 	return { template: '{{adjustedpartyear}} % of year passed since winter solstice' };
-}
+};

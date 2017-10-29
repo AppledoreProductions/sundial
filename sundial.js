@@ -1,14 +1,8 @@
-﻿﻿/* global degToRad */
-
-/* global drawGlobeDirective */
-/* global drawOtherGlobeDirective */
-/* global displayLocationDirective */
-/* global displaySeasonalEffectDirective */
-/* global displayPartYearDirective */
-/* global displayDateDirective */
-
-(function (angular) {
+﻿﻿(function (angular) {
 	'use strict';
+
+	var sdUtil = window.sdUtil;
+	var sdDir = window.sdDir;
 
 	var app = angular.module('sundial', []);
 	app.controller('sundialController', function ($scope, $interval) {
@@ -52,7 +46,7 @@
 				meridianRotation = 0 - meridianRotation;
 			}
 
-			var radiusOfNewEllipse = Math.sin(degToRad(meridianRotation)) * radius;
+			var radiusOfNewEllipse = Math.sin(sdUtil.degToRad(meridianRotation)) * radius;
 			if (radiusOfNewEllipse > 0) {
 				lonRings.push({ cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'right-prime-meridian' });
 			} else if (radiusOfNewEllipse < 0) {
@@ -70,7 +64,7 @@
 			var i;
 			// locate rotating rings
 			for (i = lineIncrementInDegrees; i < 360;) {
-				radiusOfNewEllipse = Math.sin(degToRad(i + rotation)) * radius;
+				radiusOfNewEllipse = Math.sin(sdUtil.degToRad(i + rotation)) * radius;
 
 				if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
 					lonRings.push({ cx: centre, cy: centre, rx: 0 - radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'right-prime-meridian' });
@@ -86,7 +80,7 @@
 			// locate latitude parallels
 			latLines = [{ x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle }];
 			for (i = lineIncrementInDegrees; i < 90;) {
-				var heightOfNewLine = Math.sin(degToRad(i)) * radius;
+				var heightOfNewLine = Math.sin(sdUtil.degToRad(i)) * radius;
 				var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
 				latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle });
 				latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre - heightOfNewLine, y2: centre - heightOfNewLine, style: lineStyle });
@@ -103,8 +97,8 @@
 				realtime += 360;
 			}
 
-			var tiltRad = degToRad($scope.axialtilt);
-			var realtimeRad = degToRad(realtime);
+			var tiltRad = sdUtil.degToRad($scope.axialtilt);
+			var realtimeRad = sdUtil.degToRad(realtime);
 
 			var minorhalf = Math.abs(Math.cos(tiltRad)) * radius;
 
@@ -270,7 +264,7 @@
 				}
 			}
 
-			var radiusOfNewEllipse = Math.sin(degToRad(meridianRotation)) * radius;
+			var radiusOfNewEllipse = Math.sin(sdUtil.degToRad(meridianRotation)) * radius;
 			if (radiusOfNewEllipse > 0) {
 				lonRings.push({ cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'right-prime-meridian' });
 			} else if (radiusOfNewEllipse < 0) {
@@ -287,7 +281,7 @@
 			rotation += 90;
 			// locate rotating rings
 			for (var i = lineIncrementInDegrees; i < 360;) {
-				radiusOfNewEllipse = Math.sin(degToRad(i + rotation)) * radius;
+				radiusOfNewEllipse = Math.sin(sdUtil.degToRad(i + rotation)) * radius;
 
 				if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
 					lonRings.push({ cx: centre, cy: centre, rx: 0 - radiusOfNewEllipse, ry: radius, style: lineStyle, meridian: 'right-prime-meridian' });
@@ -303,7 +297,7 @@
 			// locate latitude parallels
 			latLines = [{ x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle }];
 			for (i = lineIncrementInDegrees; i < 90;) {
-				var heightOfNewLine = Math.sin(degToRad(i)) * radius;
+				var heightOfNewLine = Math.sin(sdUtil.degToRad(i)) * radius;
 				var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
 				latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle });
 				latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre - heightOfNewLine, y2: centre - heightOfNewLine, style: lineStyle });
@@ -344,8 +338,8 @@
 			lonDeg = 0;
 
 			// convert to radians
-			var latRad = degToRad(latDeg);
-			var lonRad = degToRad(lonDeg);
+			var latRad = sdUtil.degToRad(latDeg);
+			var lonRad = sdUtil.degToRad(lonDeg);
 
 			// calculate position of box
 			var coordY = Math.sin(latRad) * radius;
@@ -402,8 +396,8 @@
 			lonDeg = lonDeg + rotation;
 
 			// convert to radians
-			var latRad = degToRad(latDeg);
-			var lonRad = degToRad(lonDeg);
+			var latRad = sdUtil.degToRad(latDeg);
+			var lonRad = sdUtil.degToRad(lonDeg);
 
 			// calculate position of box
 			var coordY = Math.sin(latRad) * radius;
@@ -442,11 +436,11 @@
 				latDeg = 0 - latDeg;
 			}
 
-			var latRad = degToRad(latDeg);
+			var latRad = sdUtil.degToRad(latDeg);
 			var coordY = Math.sin(latRad) * radius;
 			var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY);
 
-			var tiltRad = degToRad(tiltDeg);
+			var tiltRad = sdUtil.degToRad(tiltDeg);
 			var sineOfAngleLost = (coordY / radiusOfLineAtY) * Math.tan(tiltRad);
 			var seasonalEffect;
 
@@ -659,11 +653,11 @@
 		$scope.tick();
 	});
 
-	app.directive('drawGlobe', drawGlobeDirective);
-	app.directive('drawOtherGlobe', drawOtherGlobeDirective);
-	app.directive('displayLocation', displayLocationDirective);
-	app.directive('displaySeasonalEffect', displaySeasonalEffectDirective);
-	app.directive('displayPartYear', displayPartYearDirective);
-	app.directive('displayDate', displayDateDirective);
+	app.directive('drawGlobe', sdDir.drawGlobeDirective);
+	app.directive('drawOtherGlobe', sdDir.drawOtherGlobeDirective);
+	app.directive('displayLocation', sdDir.displayLocationDirective);
+	app.directive('displaySeasonalEffect', sdDir.displaySeasonalEffectDirective);
+	app.directive('displayPartYear', sdDir.displayPartYearDirective);
+	app.directive('displayDate', sdDir.displayDateDirective);
 
 })(window.angular);
