@@ -1,4 +1,13 @@
-﻿﻿(function (angular) {
+﻿﻿/* global degToRad */
+
+/* global drawGlobeDirective */
+/* global drawOtherGlobeDirective */
+/* global displayLocationDirective */
+/* global displaySeasonalEffectDirective */
+/* global displayPartYearDirective */
+/* global displayDateDirective */
+
+(function (angular) {
 	'use strict';
 
 	var app = angular.module('sundial', []);
@@ -58,8 +67,9 @@
 			}
 			// sin(90) = 1
 			rotation += 90;
+			var i;
 			// locate rotating rings
-			for (var i = lineIncrementInDegrees; i < 360;) {
+			for (i = lineIncrementInDegrees; i < 360;) {
 				radiusOfNewEllipse = Math.sin(degToRad(i + rotation)) * radius;
 
 				if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
@@ -75,7 +85,7 @@
 
 			// locate latitude parallels
 			latLines = [{ x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle }];
-			for (var i = lineIncrementInDegrees; i < 90;) {
+			for (i = lineIncrementInDegrees; i < 90;) {
 				var heightOfNewLine = Math.sin(degToRad(i)) * radius;
 				var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
 				latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle });
@@ -292,7 +302,7 @@
 
 			// locate latitude parallels
 			latLines = [{ x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle }];
-			for (var i = lineIncrementInDegrees; i < 90;) {
+			for (i = lineIncrementInDegrees; i < 90;) {
 				var heightOfNewLine = Math.sin(degToRad(i)) * radius;
 				var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
 				latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle });
