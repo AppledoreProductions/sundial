@@ -123,8 +123,10 @@
 		$scope.tilt = sdCtrl.tick($scope);
 	});
 
-	app.directive('drawGlobe', sdDir.drawGlobeDirective);
+	// geocentrism code
 	// app.directive('drawOtherGlobe', sdDir.drawOtherGlobeDirective);
+
+	app.directive('drawGlobe', sdDir.drawGlobeDirective);
 	app.directive('displayLocation', sdDir.displayLocationDirective);
 	app.directive('displaySeasonalEffect', sdDir.displaySeasonalEffectDirective);
 	app.directive('displayPartYear', sdDir.displayPartYearDirective);

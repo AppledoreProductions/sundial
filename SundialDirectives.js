@@ -1,5 +1,7 @@
 ﻿var sdDir = {};
 
+// geocentrism code
+
 // sdDir.drawOtherGlobeDirective = function () {
 // 	var template = '';
 // 	template += '<svg width="{{globe.boxWidth}}" height="{{globe.boxWidth}}">';
