@@ -22,7 +22,7 @@
 				// user pressed Reset button
 				$scope.advance = 0;
 				// start clock at 1 second per second
-				return $scope.changeClockSpeed(1, true, $interval);
+				return $scope.changeClockSpeed(1, true);
 			}
 
 			var FPS = 60;
@@ -115,8 +115,8 @@
 		$scope.ticking = undefined;
 
 		// watch time factor
-		$scope.$watch('timefactor', function (newValue, oldValue, $scope) {
-			$scope.changeClockSpeed(newValue, false, $interval);
+		$scope.$watch('timefactor', function (newValue, oldValue) {
+			$scope.changeClockSpeed(newValue, false);
 		});
 
 		// initialise view
@@ -141,7 +141,7 @@
 				// user pressed Reset button
 				$scope.advance = 0;
 				// start clock at 1 second per second
-				return $scope.changeClockSpeed(1, true, $interval);
+				return $scope.changeClockSpeed(1, true);
 			}
 
 			var FPS = 60;
@@ -234,8 +234,8 @@
 		$scope.ticking = undefined;
 
 		// watch time factor
-		$scope.$watch('timefactor', function (newValue, oldValue, $scope) {
-			$scope.changeClockSpeed(newValue, false, $interval);
+		$scope.$watch('timefactor', function (newValue, oldValue) {
+			$scope.changeClockSpeed(newValue, false);
 		});
 
 		// initialise view
