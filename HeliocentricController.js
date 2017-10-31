@@ -162,47 +162,6 @@ sdHelioCtrl.drawLineSet = function ($scope, rotation) {
     return lineSet;
 };
 
-sdHelioCtrl.changeClockSpeed = function ($scope, $interval, timefactor, justReset) {
-    if (!justReset) {
-        // if we're coming out of a reset, the clock was already stopped
-        // otherwise, stop it
-        $interval.cancel($scope.ticking);
-    }
-
-    if (timefactor === 0) {
-        // user pressed Pause button
-        return;
-    } else if (timefactor === -1) {
-        // user pressed Reset button
-        $scope.advance = 0;
-        // start clock at 1 second per second
-        return sdHelioCtrl.changeClockSpeed($scope, $interval, 1, true);
-    }
-
-    var FPS = 60;
-    // start clock
-    if (timefactor === 1) {
-        $scope.ticking = $interval(function () {
-            var d = new Date();
-            $scope.date = new Date(d);
-            $scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-            $scope.tilt = sdUtil.tick($scope);
-        }, 1000 / FPS);
-    }
-    else {
-        // or start pseudo-clock
-        // the reason we need a special synchronised case for 1-second-per-second
-        // is that people notice if that case is broken
-        $scope.ticking = $interval(function () {
-            var d = new Date();
-            $scope.date = new Date(d);
-            $scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-            $scope.tilt = sdUtil.tick($scope);
-            $scope.advance += timefactor / FPS;
-        }, 1000 / FPS);
-    }
-};
-
 sdHelioCtrl.controller = function ($scope, $interval) {
 
     // set fixed drawing parameters
@@ -273,7 +232,7 @@ sdHelioCtrl.controller = function ($scope, $interval) {
 
     // watch time factor
     $scope.$watch('timefactor', function (newValue, oldValue) {
-        sdHelioCtrl.changeClockSpeed($scope, $interval, newValue, false);
+        sdUtil.changeClockSpeed($scope, $interval, newValue, false);
     });
 
     // initialise view
