@@ -15,6 +15,7 @@
 				// otherwise, stop it
 				$interval.cancel($scope.ticking);
 			}
+			
 			if (timefactor === 0) {
 				// user pressed Pause button
 				return;
@@ -135,6 +136,7 @@
 				// otherwise, stop it
 				$interval.cancel($scope.ticking);
 			}
+
 			if (timefactor === 0) {
 				// user pressed Pause button
 				return;
