@@ -1,12 +1,6 @@
 ﻿var sdHelioCtrl = {};
 var sdUtil = window.sdUtil;
 
-sdHelioCtrl.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
-
-    return sdUtil.calculateSeasonalEffect($scope.globe.radius, $scope.tilt.rotation, $scope.planet.flip, latDeg, tiltDeg);
-
-};
-
 sdHelioCtrl.drawLocationBox = function ($scope, latDeg, lonDeg) {
 
     // scrape necessary calculation values
@@ -237,7 +231,7 @@ sdHelioCtrl.controller = function ($scope, $interval) {
 
     // watch inputs
     $scope.$watchGroup(['user.latitude', 'tilt.axialtilt'], function (newValues, oldValues, $scope) {
-        $scope.seasonalEffect = sdHelioCtrl.calculateSeasonalEffect($scope, newValues[0], newValues[1]);
+        $scope.seasonalEffect = sdUtil.calculateSeasonalEffect($scope, newValues[0], newValues[1]);
     });
 
     // watch inputs

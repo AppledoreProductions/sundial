@@ -4,7 +4,11 @@ sdUtil.degToRad = function (deg) {
 	return deg * 2 * Math.PI / 360;
 };
 
-sdUtil.calculateSeasonalEffect = function (radius, rotation, flip, latDeg, tiltDeg) {
+sdUtil.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
+
+    var radius = $scope.globe.radius;
+    var rotation = $scope.tilt.rotation;
+    var flip = $scope.planet.flip;
 
     // allow for planets with such large tilts they flip upside-down
     if (tiltDeg < -90) {
