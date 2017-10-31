@@ -170,7 +170,7 @@ sdHelioCtrl.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
 
 sdHelioCtrl.tick = function ($scope) {
 
-    return sdUtil.tick($scope, $scope.date, $scope.planet.dpy, $scope.planet.ypy, $scope.planet.flip, $scope.planet.maxtilt, $scope.tilt);
+    return sdUtil.tick($scope.date, $scope.planet.dpy, $scope.planet.ypy, $scope.planet.flip, $scope.planet.maxtilt, $scope.tilt);
 
 };
 
