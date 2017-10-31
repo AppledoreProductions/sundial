@@ -9,7 +9,7 @@
 
 	app.controller('heliocentricController', function ($scope, $interval) {
 
-		$scope.changeClockSpeed = function (timefactor, justReset, $interval) {
+		$scope.changeClockSpeed = function (timefactor, justReset) {
 			if (!justReset) {
 				$interval.cancel($scope.ticking);
 			}
@@ -125,7 +125,7 @@
 
 	app.controller('geocentricController', function ($scope, $interval) {
 
-		$scope.changeClockSpeed = function (timefactor, justReset, $interval) {
+		$scope.changeClockSpeed = function (timefactor, justReset) {
 			if (!justReset) {
 				$interval.cancel($scope.ticking);
 			}
