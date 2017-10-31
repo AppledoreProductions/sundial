@@ -11,15 +11,17 @@
 
 		$scope.changeClockSpeed = function (timefactor, justReset) {
 			if (!justReset) {
+				// if we're coming out of a reset, the clock was already stopped
+				// otherwise, stop it
 				$interval.cancel($scope.ticking);
 			}
-			// pause
 			if (timefactor === 0) {
+				// user pressed Pause button
 				return;
-			}
-			// reset clock
-			if (timefactor === -1) {
+			} else if (timefactor === -1) {
+				// user pressed Reset button
 				$scope.advance = 0;
+				// start clock at 1 second per second
 				$scope.changeClockSpeed(1, true, $interval);
 				return;
 			}
@@ -104,7 +106,9 @@
 			});
 		};
 		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, { enableHighAccuracy: true });
+			navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, {
+				enableHighAccuracy: true
+			});
 		} else {
 			alert("Turn geolocation on.");
 		}
@@ -127,15 +131,17 @@
 
 		$scope.changeClockSpeed = function (timefactor, justReset) {
 			if (!justReset) {
+				// if we're coming out of a reset, the clock was already stopped
+				// otherwise, stop it
 				$interval.cancel($scope.ticking);
 			}
-			// pause
 			if (timefactor === 0) {
+				// user pressed Pause button
 				return;
-			}
-			// reset clock
-			if (timefactor === -1) {
+			} else if (timefactor === -1) {
+				// user pressed Reset button
 				$scope.advance = 0;
+				// start clock at 1 second per second
 				$scope.changeClockSpeed(1, true, $interval);
 				return;
 			}
@@ -220,7 +226,9 @@
 			});
 		};
 		if (navigator.geolocation) {
-			navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, { enableHighAccuracy: true });
+			navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, {
+				enableHighAccuracy: true
+			});
 		} else {
 			alert("Turn geolocation on.");
 		}
