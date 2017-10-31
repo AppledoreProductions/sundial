@@ -79,7 +79,15 @@ sdUtil.calculateSeasonalEffect = function (radius, rotation, flip, latDeg, tiltD
     return seasonalEffect;
 };
 
-sdUtil.tick = function (d, dpy, ypy, flip, maxtilt, tilt) {
+sdUtil.tick = function ($scope) {
+
+    var d = $scope.date;
+    var dpy = $scope.planet.dpy;
+    var ypy = $scope.planet.ypy;
+    var flip = $scope.planet.flip;
+    var maxtilt = $scope.planet.maxtilt;
+    var tilt = $scope.tilt;
+
     // scrape necessary calculation values
     var rotation = 0;
     if (tilt) {

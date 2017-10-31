@@ -7,12 +7,6 @@ sdHelioCtrl.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
 
 };
 
-sdHelioCtrl.tick = function ($scope) {
-
-    return sdUtil.tick($scope.date, $scope.planet.dpy, $scope.planet.ypy, $scope.planet.flip, $scope.planet.maxtilt, $scope.tilt);
-
-};
-
 sdHelioCtrl.drawLocationBox = function ($scope, latDeg, lonDeg) {
 
     // scrape necessary calculation values
@@ -198,7 +192,7 @@ sdHelioCtrl.changeClockSpeed = function ($scope, $interval, timefactor, justRese
             var d = new Date();
             $scope.date = new Date(d);
             $scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-            $scope.tilt = sdHelioCtrl.tick($scope);
+            $scope.tilt = sdUtil.tick($scope);
         }, 1000 / FPS);
     }
     else {
@@ -209,7 +203,7 @@ sdHelioCtrl.changeClockSpeed = function ($scope, $interval, timefactor, justRese
             var d = new Date();
             $scope.date = new Date(d);
             $scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-            $scope.tilt = sdHelioCtrl.tick($scope);
+            $scope.tilt = sdUtil.tick($scope);
             $scope.advance += timefactor / FPS;
         }, 1000 / FPS);
     }
@@ -292,7 +286,7 @@ sdHelioCtrl.controller = function ($scope, $interval) {
     $scope.advance = 0;
     $scope.timefactor = 1;
     $scope.date = new Date();
-    $scope.tilt = sdHelioCtrl.tick($scope);
+    $scope.tilt = sdUtil.tick($scope);
 };
 
 window.sdHelioCtrl = sdHelioCtrl;
