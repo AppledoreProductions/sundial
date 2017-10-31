@@ -1,6 +1,18 @@
 ﻿var sdHelioCtrl = {};
 var sdUtil = window.sdUtil;
 
+sdHelioCtrl.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
+
+    return sdUtil.calculateSeasonalEffect($scope.globe.radius, $scope.tilt.rotation, $scope.planet.flip, latDeg, tiltDeg);
+
+};
+
+sdHelioCtrl.tick = function ($scope) {
+
+    return sdUtil.tick($scope.date, $scope.planet.dpy, $scope.planet.ypy, $scope.planet.flip, $scope.planet.maxtilt, $scope.tilt);
+
+};
+
 sdHelioCtrl.drawLocationBox = function ($scope, latDeg, lonDeg) {
 
     // scrape necessary calculation values
@@ -162,25 +174,13 @@ sdHelioCtrl.drawLineSet = function ($scope, rotation) {
     return lineSet;
 };
 
-sdHelioCtrl.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
-
-    return sdUtil.calculateSeasonalEffect($scope.globe.radius, $scope.tilt.rotation, $scope.planet.flip, latDeg, tiltDeg);
-
-};
-
-sdHelioCtrl.tick = function ($scope) {
-
-    return sdUtil.tick($scope.date, $scope.planet.dpy, $scope.planet.ypy, $scope.planet.flip, $scope.planet.maxtilt, $scope.tilt);
-
-};
-
 sdHelioCtrl.changeClockSpeed = function ($scope, $interval, timefactor, justReset) {
     if (!justReset) {
         // if we're coming out of a reset, the clock was already stopped
         // otherwise, stop it
         $interval.cancel($scope.ticking);
     }
-    
+
     if (timefactor === 0) {
         // user pressed Pause button
         return;
@@ -213,6 +213,86 @@ sdHelioCtrl.changeClockSpeed = function ($scope, $interval, timefactor, justRese
             $scope.advance += timefactor / FPS;
         }, 1000 / FPS);
     }
+};
+
+sdHelioCtrl.controller = function ($scope, $interval) {
+
+    // set fixed drawing parameters
+    $scope.globe = {
+        boxWidth: 500,
+        lines: 6,
+        locationBoxWidth: 2
+    };
+    $scope.globe.centre = $scope.globe.boxWidth / 2;
+    $scope.globe.radius = $scope.globe.centre * 0.9;
+
+    // set default planet parameters
+    $scope.planet = {
+        maxtilt: 23.4,
+        dpy: 365.26,
+        ypy: 1,
+        earth: true,
+        flip: true
+    };
+
+    // watch inputs
+    $scope.$watchGroup(['user.latitude', 'user.longitude', 'tilt.rotation'], function (newValues, oldValues, $scope) {
+        $scope.lineSet = sdHelioCtrl.drawLineSet($scope, newValues[2]);
+        $scope.locationBox = sdHelioCtrl.drawLocationBox($scope, newValues[0], newValues[1]);
+    });
+
+    // watch inputs
+    $scope.$watchGroup(['user.latitude', 'tilt.axialtilt'], function (newValues, oldValues, $scope) {
+        $scope.seasonalEffect = sdHelioCtrl.calculateSeasonalEffect($scope, newValues[0], newValues[1]);
+    });
+
+    // watch inputs
+    $scope.$watch('earth', function (newValue, oldValue, $scope) {
+        if (newValue === true) {
+            // reset to default planet parameters
+            $scope.planet = {
+                maxtilt: 23.4,
+                dpy: 365.26,
+                ypy: 1
+            };
+        }
+    });
+
+    // locate user
+    $scope.user = {};
+    $scope.setLocation = function (position) {
+        $scope.$apply(function () {
+            $scope.user.latitude = position.coords.latitude;
+            $scope.user.longitude = position.coords.longitude;
+        });
+    };
+    $scope.defaultLocation = function () {
+        // London
+        $scope.$apply(function () {
+            $scope.user.latitude = 51.5072;
+            $scope.user.longitude = 0;
+        });
+    };
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition($scope.setLocation, $scope.defaultLocation, {
+            enableHighAccuracy: true
+        });
+    } else {
+        alert("Turn geolocation on.");
+    }
+
+    $scope.ticking = undefined;
+
+    // watch time factor
+    $scope.$watch('timefactor', function (newValue, oldValue) {
+        sdHelioCtrl.changeClockSpeed($scope, $interval, newValue, false);
+    });
+
+    // initialise view
+    $scope.advance = 0;
+    $scope.timefactor = 1;
+    $scope.date = new Date();
+    $scope.tilt = sdHelioCtrl.tick($scope);
 };
 
 window.sdHelioCtrl = sdHelioCtrl;
