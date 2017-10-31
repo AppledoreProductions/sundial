@@ -22,8 +22,7 @@
 				// user pressed Reset button
 				$scope.advance = 0;
 				// start clock at 1 second per second
-				$scope.changeClockSpeed(1, true, $interval);
-				return;
+				return $scope.changeClockSpeed(1, true, $interval);
 			}
 
 			var FPS = 60;
@@ -142,8 +141,7 @@
 				// user pressed Reset button
 				$scope.advance = 0;
 				// start clock at 1 second per second
-				$scope.changeClockSpeed(1, true, $interval);
-				return;
+				return $scope.changeClockSpeed(1, true, $interval);
 			}
 
 			var FPS = 60;
