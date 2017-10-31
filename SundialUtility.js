@@ -4,12 +4,7 @@ sdUtil.degToRad = function (deg) {
 	return deg * 2 * Math.PI / 360;
 };
 
-sdUtil.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
-	
-    // scrape necessary calculation values
-    var radius = $scope.globe.radius;
-    var rotation = $scope.tilt.rotation;
-    var flip = $scope.planet.flip;
+sdUtil.calculateSeasonalEffect = function (radius, rotation, flip, latDeg, tiltDeg) {
 
     // allow for planets with such large tilts they flip upside-down
     if (tiltDeg < -90) {
@@ -84,22 +79,15 @@ sdUtil.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
     return seasonalEffect;
 };
 
-sdUtil.tick = function ($scope) 
+sdUtil.tick = function ($scope, d, dpy, ypy, flip, maxtilt, tilt) 
 {
     // scrape necessary calculation values
-    var d = $scope.date;
-    var dpy = $scope.planet.dpy;
-    var ypy = $scope.planet.ypy;
-    var flip = $scope.planet.flip;
-    var maxtilt = $scope.planet.maxtilt;
-
     var rotation = 0;
-    if ($scope.tilt) {
-        rotation = $scope.tilt.rotation;
+    if (tilt) {
+        rotation = tilt.rotation;
     }
 
-    var tilt = {};
-
+    tilt = {};
 
     // work out correct rotation for the current time
     // to a silly degree of accuracy so that we can see the numbers move

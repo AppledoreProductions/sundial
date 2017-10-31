@@ -268,14 +268,14 @@ sdGeoCtrl.drawLineSet = function ($scope, rotation) {
 
 sdGeoCtrl.calculateSeasonalEffect = function ($scope, latDeg, tiltDeg) {
 
-    return sdUtil.calculateSeasonalEffect($scope, latDeg, tiltDeg);
-
+    return sdUtil.calculateSeasonalEffect($scope.globe.radius, $scope.tilt.rotation, $scope.planet.flip, latDeg, tiltDeg);
+    
 };
 
 sdGeoCtrl.tick = function ($scope) {
 
-    return sdUtil.tick($scope);
-
+    return sdUtil.tick($scope, $scope.date, $scope.planet.dpy, $scope.planet.ypy, $scope.planet.flip, $scope.planet.maxtilt, $scope.tilt);
+    
 };
 
 window.sdGeoCtrl = sdGeoCtrl;
