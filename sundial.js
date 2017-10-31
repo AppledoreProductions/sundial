@@ -2,9 +2,11 @@
 	'use strict';
 
 	var sdHelioCtrl = window.sdHelioCtrl;
+	var sdGeoCtrl = window.sdGeoCtrl;
 	var sdDir = window.sdDir;
 
 	var app = angular.module('sundial', []);
+
 	app.controller('heliocentricController', function ($scope, $interval) {
 
 		$scope.changeClockSpeed = function (timefactor, justReset, $interval) {
@@ -66,9 +68,7 @@
 		// watch inputs
 		$scope.$watchGroup(['user.latitude', 'user.longitude', 'tilt.rotation'], function (newValues, oldValues, $scope) {
 			$scope.lineSet = sdHelioCtrl.drawLineSet($scope, newValues[2]);
-			// $scope.otherLineSet = sdHelioCtrl.drawOtherLineSet($scope, newValues[2]);
 			$scope.locationBox = sdHelioCtrl.drawLocationBox($scope, newValues[0], newValues[1]);
-			// $scope.otherLocationBox = sdHelioCtrl.drawOtherLocationBox($scope, newValues[0], newValues[1]);
 		});
 
 		// watch inputs
@@ -147,7 +147,7 @@
 					var d = new Date();
 					$scope.date = new Date(d);
 					$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-					$scope.tilt = sdHelioCtrl.tick($scope);
+					$scope.tilt = sdGeoCtrl.tick($scope);
 				}, 1000 / FPS);
 				return;
 			}
@@ -158,7 +158,7 @@
 				var d = new Date();
 				$scope.date = new Date(d);
 				$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-				$scope.tilt = sdHelioCtrl.tick($scope);
+				$scope.tilt = sdGeoCtrl.tick($scope);
 				$scope.advance += timefactor / FPS;
 			}, 1000 / FPS);
 		};
@@ -183,15 +183,13 @@
 
 		// watch inputs
 		$scope.$watchGroup(['user.latitude', 'user.longitude', 'tilt.rotation'], function (newValues, oldValues, $scope) {
-			$scope.lineSet = sdHelioCtrl.drawLineSet($scope, newValues[2]);
-			// $scope.otherLineSet = sdHelioCtrl.drawOtherLineSet($scope, newValues[2]);
-			$scope.locationBox = sdHelioCtrl.drawLocationBox($scope, newValues[0], newValues[1]);
-			// $scope.otherLocationBox = sdHelioCtrl.drawOtherLocationBox($scope, newValues[0], newValues[1]);
+			$scope.lineSet = sdGeoCtrl.drawLineSet($scope, newValues[2]);
+			$scope.locationBox = sdGeoCtrl.drawLocationBox($scope, newValues[0], newValues[1]);
 		});
 
 		// watch inputs
 		$scope.$watchGroup(['user.latitude', 'tilt.axialtilt'], function (newValues, oldValues, $scope) {
-			$scope.seasonalEffect = sdHelioCtrl.calculateSeasonalEffect($scope, newValues[0], newValues[1]);
+			$scope.seasonalEffect = sdGeoCtrl.calculateSeasonalEffect($scope, newValues[0], newValues[1]);
 		});
 
 		// watch inputs
@@ -238,7 +236,7 @@
 		$scope.advance = 0;
 		$scope.timefactor = 1;
 		$scope.date = new Date();
-		$scope.tilt = sdHelioCtrl.tick($scope);
+		$scope.tilt = sdGeoCtrl.tick($scope);
 	});
 
 	app.directive('drawHelioGlobe', sdDir.drawHelioGlobeDirective);
