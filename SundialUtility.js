@@ -79,8 +79,7 @@ sdUtil.calculateSeasonalEffect = function (radius, rotation, flip, latDeg, tiltD
     return seasonalEffect;
 };
 
-sdUtil.tick = function (d, dpy, ypy, flip, maxtilt, tilt) 
-{
+sdUtil.tick = function (d, dpy, ypy, flip, maxtilt, tilt) {
     // scrape necessary calculation values
     var rotation = 0;
     if (tilt) {

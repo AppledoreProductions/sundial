@@ -278,4 +278,44 @@ sdGeoCtrl.tick = function ($scope) {
     
 };
 
+sdGeoCtrl.changeClockSpeed = function ($scope, $interval, timefactor, justReset) {
+    if (!justReset) {
+        // if we're coming out of a reset, the clock was already stopped
+        // otherwise, stop it
+        $interval.cancel($scope.ticking);
+    }
+
+    if (timefactor === 0) {
+        // user pressed Pause button
+        return;
+    } else if (timefactor === -1) {
+        // user pressed Reset button
+        $scope.advance = 0;
+        // start clock at 1 second per second
+        return sdGeoCtrl.changeClockSpeed($scope, $interval, 1, true);
+    }
+
+    var FPS = 60;
+    // start clock
+    if (timefactor === 1) {
+        $scope.ticking = $interval(function () {
+            var d = new Date();
+            $scope.date = new Date(d);
+            $scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
+            $scope.tilt = sdGeoCtrl.tick($scope);
+        }, 1000 / FPS);
+    } else {
+        // or start pseudo-clock
+        // the reason we need a special synchronised case for 1-second-per-second
+        // is that people notice if that case is broken
+        $scope.ticking = $interval(function () {
+            var d = new Date();
+            $scope.date = new Date(d);
+            $scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
+            $scope.tilt = sdGeoCtrl.tick($scope);
+            $scope.advance += timefactor / FPS;
+        }, 1000 / FPS);
+    }
+};
+
 window.sdGeoCtrl = sdGeoCtrl;
