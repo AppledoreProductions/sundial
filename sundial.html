@@ -1,33 +1,35 @@
 ﻿<!DOCTYPE html>
 <html>
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 
-	<script src="SundialUtility.js"></script>
-	<script src="SundialController.js"></script>
-	<script src="SundialDirectives.js"></script>
-	<script src="sundial.js"></script>
+    <script src="SundialUtility.js"></script>
+    <script src="HeliocentricController.js"></script>
+    <script src="GeocentricController.js"></script>
+    <script src="SundialDirectives.js"></script>
+    <script src="sundial.js"></script>
 </head>
 
 <body ng-app="sundial">
 
-    <div ng-controller="sundialController">
-<!-- 
-geocentrism code
-        <div id="geo" style="float:left; display:none;"><div draw-other-globe></div></div> -->
-        <div id="helio" style="float:right;"><div draw-globe></div></div>
-        
-        <input type="checkbox" ng-model="planet.earth">
-        Earth
-        <input type="checkbox" ng-model="planet.flip">
-        Flip to show location<br />
+    <div ng-controller="heliocentricController">
+        <div id="helio" style="float:right;">
+            <div draw-helio-globe></div>
+        </div>
+
+        <input type="checkbox" ng-model="planet.earth"> Earth
+        <input type="checkbox" ng-model="planet.flip"> Flip to show location
+        <br />
         <p>True axial tilt in degrees :
             <input ng-readonly="earth" type="number" ng-model="planet.maxtilt">, rotations per revolution :
             <input ng-readonly="earth" type="number" ng-model="planet.dpy">, revolutions per Earth year :
-            <input ng-readonly="earth" type="number" ng-model="planet.ypy"></p>
-        1 second =<br />
+            <input ng-readonly="earth" type="number" ng-model="planet.ypy">
+        </p>
+        1 second =
+        <br />
         <button ng-click="timefactor = 0">Pause</button>
         <button ng-click="timefactor = 1">1 second</button>
         <button ng-click="timefactor = 60">1 minute</button>
@@ -37,23 +39,93 @@ geocentrism code
         <button ng-click="timefactor = 60*60*24*30.4">1 month</button>
         <br />
         <br />
-        <p>Time shown: <span ng-show="planet.earth" display-date><span display-part-year></span></span>
-            <br /></p>
+        <p>Time shown:
+            <span ng-show="planet.earth" display-date>
+                <span display-part-year></span>
+            </span>
+            <br />
+        </p>
         <p>
-            <button ng-click="timefactor = -1; planet.earth = true; planet.flip = true;">Reset</button></p>
-        <p>Location: <span display-location></span></p>
-        <p>Seasonal effect: <span display-seasonal-effect></span></p>
+            <button ng-click="timefactor = -1; planet.earth = true; planet.flip = true;">Reset</button>
+        </p>
+        <p>Location:
+            <span display-location></span>
+        </p>
+        <p>Seasonal effect:
+            <span display-seasonal-effect></span>
+        </p>
 
         <p>Latitude :
-            <input type="number" ng-model="user.latitude"></p>
+            <input type="number" ng-model="user.latitude">
+        </p>
         <p>Longitude :
-            <input type="number" ng-model="user.longitude"></p>
+            <input type="number" ng-model="user.longitude">
+        </p>
         <p>Rotation :
-            <input readonly type="number" ng-model="tilt.rotation"></p>
+            <input readonly type="number" ng-model="tilt.rotation">
+        </p>
         <p>Tilt :
-            <input readonly type="number" ng-model="tilt.axialtilt"></p>
+            <input readonly type="number" ng-model="tilt.axialtilt">
+        </p>
+
+    </div>
+
+
+    <div ng-controller="geocentricController" style="display:none;">
+        <div id="geo" style="float:left;">
+            <div draw-geo-globe></div>
+        </div>
+
+        <input type="checkbox" ng-model="planet.earth"> Earth
+        <input type="checkbox" ng-model="planet.flip"> Flip to show location
+        <br />
+        <p>True axial tilt in degrees :
+            <input ng-readonly="earth" type="number" ng-model="planet.maxtilt">, rotations per revolution :
+            <input ng-readonly="earth" type="number" ng-model="planet.dpy">, revolutions per Earth year :
+            <input ng-readonly="earth" type="number" ng-model="planet.ypy">
+        </p>
+        1 second =
+        <br />
+        <button ng-click="timefactor = 0">Pause</button>
+        <button ng-click="timefactor = 1">1 second</button>
+        <button ng-click="timefactor = 60">1 minute</button>
+        <button ng-click="timefactor = 60*60">1 hour</button>
+        <button ng-click="timefactor = 60*60*24">1 day</button>
+        <button ng-click="timefactor = 60*60*24*7">1 week</button>
+        <button ng-click="timefactor = 60*60*24*30.4">1 month</button>
+        <br />
+        <br />
+        <p>Time shown:
+            <span ng-show="planet.earth" display-date>
+                <span display-part-year></span>
+            </span>
+            <br />
+        </p>
+        <p>
+            <button ng-click="timefactor = -1; planet.earth = true; planet.flip = true;">Reset</button>
+        </p>
+        <p>Location:
+            <span display-location></span>
+        </p>
+        <p>Seasonal effect:
+            <span display-seasonal-effect></span>
+        </p>
+
+        <p>Latitude :
+            <input type="number" ng-model="user.latitude">
+        </p>
+        <p>Longitude :
+            <input type="number" ng-model="user.longitude">
+        </p>
+        <p>Rotation :
+            <input readonly type="number" ng-model="tilt.rotation">
+        </p>
+        <p>Tilt :
+            <input readonly type="number" ng-model="tilt.axialtilt">
+        </p>
 
     </div>
 
 </body>
+
 </html>
