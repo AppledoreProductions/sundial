@@ -34,18 +34,19 @@
 					$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
 					$scope.tilt = sdHelioCtrl.tick($scope);
 				}, 1000 / FPS);
-				return;
 			}
-			// or start pseudo-clock
-			// the reason we need a special synchronised case for 1-second-per-second
-			// is that people notice if that case is broken
-			$scope.ticking = $interval(function () {
-				var d = new Date();
-				$scope.date = new Date(d);
-				$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-				$scope.tilt = sdHelioCtrl.tick($scope);
-				$scope.advance += timefactor / FPS;
-			}, 1000 / FPS);
+			else {
+				// or start pseudo-clock
+				// the reason we need a special synchronised case for 1-second-per-second
+				// is that people notice if that case is broken
+				$scope.ticking = $interval(function () {
+					var d = new Date();
+					$scope.date = new Date(d);
+					$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
+					$scope.tilt = sdHelioCtrl.tick($scope);
+					$scope.advance += timefactor / FPS;
+				}, 1000 / FPS);
+			}
 		};
 
 		// set fixed drawing parameters
@@ -153,18 +154,18 @@
 					$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
 					$scope.tilt = sdGeoCtrl.tick($scope);
 				}, 1000 / FPS);
-				return;
+			} else {
+				// or start pseudo-clock
+				// the reason we need a special synchronised case for 1-second-per-second
+				// is that people notice if that case is broken
+				$scope.ticking = $interval(function () {
+					var d = new Date();
+					$scope.date = new Date(d);
+					$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
+					$scope.tilt = sdGeoCtrl.tick($scope);
+					$scope.advance += timefactor / FPS;
+				}, 1000 / FPS);
 			}
-			// or start pseudo-clock
-			// the reason we need a special synchronised case for 1-second-per-second
-			// is that people notice if that case is broken
-			$scope.ticking = $interval(function () {
-				var d = new Date();
-				$scope.date = new Date(d);
-				$scope.date.setSeconds($scope.date.getSeconds() + $scope.advance);
-				$scope.tilt = sdGeoCtrl.tick($scope);
-				$scope.advance += timefactor / FPS;
-			}, 1000 / FPS);
 		};
 
 		// set fixed drawing parameters
