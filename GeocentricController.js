@@ -1,15 +1,15 @@
-﻿var sdGeoCtrl = {};
-var sdUtil = window.sdUtil;
+﻿const sdGeoCtrl = {};
+const sdUtil = window.sdUtil;
 
 sdGeoCtrl.drawLocationBox = function ($scope, latDeg, lonDeg) {
 
     // scrape necessary calculation values
-    var centre = $scope.globe.centre;
-    var radius = $scope.globe.radius;
-    var flip = $scope.planet.flip;
-    var locationBoxWidth = $scope.globe.locationBoxWidth;
+    const centre = $scope.globe.centre;
+    const radius = $scope.globe.radius;
+    const flip = $scope.planet.flip;
+    const locationBoxWidth = $scope.globe.locationBoxWidth;
 
-    var rotation = 0;
+    let rotation = 0;
 
     // rotate
 
@@ -28,44 +28,44 @@ sdGeoCtrl.drawLocationBox = function ($scope, latDeg, lonDeg) {
         rotation -= 360;
     }
 
+    // TODO what is this doing?
     lonDeg = 0;
 
     // convert to radians
-    var latRad = sdUtil.degToRad(latDeg);
-    var lonRad = sdUtil.degToRad(lonDeg);
+    const latRad = sdUtil.degToRad(latDeg);
+    const lonRad = sdUtil.degToRad(lonDeg);
 
     // calculate position of box
-    var coordY = Math.sin(latRad) * radius;
-    var radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY);
-    var coordX = Math.sin(lonRad) * radiusOfLineAtY;
+    const coordY = Math.sin(latRad) * radius;
+    const radiusOfLineAtY = Math.sqrt(radius * radius - coordY * coordY);
+    const coordX = Math.sin(lonRad) * radiusOfLineAtY;
 
     // draw on screen
-    var style = "fill: red;";
+    let style = "fill: red;";
 
     // hide if behind planet
     if (!flip && (rotation > 90 && rotation <= 270)) {
         style = "fill: none;";
     }
-    var locationBox = {
+    
+    return {
         x: (centre - locationBoxWidth / 2) + coordX,
         y: (centre - locationBoxWidth / 2) - coordY,
         width: locationBoxWidth,
         height: locationBoxWidth,
         style: style
     };
-
-    return locationBox;
 };
 
 sdGeoCtrl.drawLineSet = function ($scope, rotation) {
 
     // scrape necessary calculation values
-    var centre = $scope.globe.centre;
-    var radius = $scope.globe.radius;
-    var flip = $scope.planet.flip;
-    var lines = $scope.globe.lines;
+    const centre = $scope.globe.centre;
+    const radius = $scope.globe.radius;
+    const flip = $scope.planet.flip;
+    let lines = $scope.globe.lines;
 
-    var realtime = rotation;
+    let realtime = rotation;
     rotation = -$scope.longitude;
 
     // avoids infinite loop when drawing
@@ -78,25 +78,25 @@ sdGeoCtrl.drawLineSet = function ($scope, rotation) {
         lines = 90;
     }
 
-    var equatorStyle = 'stroke:lightblue;stroke-width:1;fill:none;';
-    var lineStyle = 'stroke:lightgrey; stroke-width:1;fill:none;';
-    var meridianStyle = 'stroke:green;stroke-width:1;fill:none;';
+    const equatorStyle = 'stroke:lightblue;stroke-width:1;fill:none;';
+    const lineStyle = 'stroke:lightgrey; stroke-width:1;fill:none;';
+    let meridianStyle = 'stroke:green;stroke-width:1;fill:none;';
 
     // calculate positions of lines
-    var lineIncrementInDegrees = 90 / lines;
-    var lonRings = [];
-    var latLines = [];
+    const lineIncrementInDegrees = 90 / lines;
+    const lonRings = [];
+    let latLines = [];
 
     // locate prime meridian
 
-    var meridianRotation = rotation;
+    let meridianRotation = rotation;
 
     if (meridianRotation > 90 && meridianRotation <= 270) {
         meridianStyle = 'stroke:red;stroke-width:1;fill:none;';
         meridianRotation = 0 - meridianRotation;
     }
 
-    var radiusOfNewEllipse = Math.sin(sdUtil.degToRad(meridianRotation)) * radius;
+    let radiusOfNewEllipse = Math.sin(sdUtil.degToRad(meridianRotation)) * radius;
     if (radiusOfNewEllipse > 0) {
         lonRings.push({ cx: centre, cy: centre, rx: radiusOfNewEllipse, ry: radius, style: meridianStyle, meridian: 'right-prime-meridian' });
     } else if (radiusOfNewEllipse < 0) {
@@ -111,9 +111,9 @@ sdGeoCtrl.drawLineSet = function ($scope, rotation) {
     }
     // sin(90) = 1
     rotation += 90;
-    var i;
+
     // locate rotating rings
-    for (i = lineIncrementInDegrees; i < 360;) {
+    for (let i = lineIncrementInDegrees; i < 360;) {
         radiusOfNewEllipse = Math.sin(sdUtil.degToRad(i + rotation)) * radius;
 
         if (i + rotation > 90 && i + rotation <= 270 && radiusOfNewEllipse < 0) {
@@ -129,16 +129,16 @@ sdGeoCtrl.drawLineSet = function ($scope, rotation) {
 
     // locate latitude parallels
     latLines = [{ x1: centre - radius, x2: centre + radius, y1: centre, y2: centre, style: equatorStyle }];
-    for (i = lineIncrementInDegrees; i < 90;) {
-        var heightOfNewLine = Math.sin(sdUtil.degToRad(i)) * radius;
-        var radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
+    for (let i = lineIncrementInDegrees; i < 90;) {
+        const heightOfNewLine = Math.sin(sdUtil.degToRad(i)) * radius;
+        const radiusOfNewLine = Math.sqrt(radius * radius - heightOfNewLine * heightOfNewLine);
         latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre + heightOfNewLine, y2: centre + heightOfNewLine, style: lineStyle });
         latLines.push({ x1: centre - radiusOfNewLine, x2: centre + radiusOfNewLine, y1: centre - heightOfNewLine, y2: centre - heightOfNewLine, style: lineStyle });
         i = i + lineIncrementInDegrees;
     }
 
     // draw on screen
-    var lineSet = {
+    const lineSet = {
         lonRings: lonRings,
         latLines: latLines
     };
@@ -149,28 +149,28 @@ sdGeoCtrl.drawLineSet = function ($scope, rotation) {
         realtime += 360;
     }
 
-    var tiltRad = sdUtil.degToRad($scope.tilt.axialtilt);
-    var realtimeRad = sdUtil.degToRad(realtime);
+    const tiltRad = sdUtil.degToRad($scope.tilt.axialtilt);
+    const realtimeRad = sdUtil.degToRad(realtime);
 
-    var minorhalf = Math.abs(Math.cos(tiltRad)) * radius;
+    const minorhalf = Math.abs(Math.cos(tiltRad)) * radius;
 
     // radius at arctic circle
-    var arcticRadius = Math.sqrt(radius * radius - minorhalf * minorhalf);
+    const arcticRadius = Math.sqrt(radius * radius - minorhalf * minorhalf);
 
     // target location on radius
-    var partArcticRadius = Math.cos(realtimeRad) * arcticRadius;
-    var minorHalfAdjusted = Math.sqrt(minorhalf * minorhalf + partArcticRadius * partArcticRadius);
-    var suntilt = Math.acos(minorhalf / minorHalfAdjusted) * (180 / Math.PI);
+    const partArcticRadius = Math.cos(realtimeRad) * arcticRadius;
+    const minorHalfAdjusted = Math.sqrt(minorhalf * minorhalf + partArcticRadius * partArcticRadius);
+    let suntilt = Math.acos(minorhalf / minorHalfAdjusted) * (180 / Math.PI);
     if (realtime < 90 || realtime >= 270) {
         suntilt = 0 - suntilt;
     }
 
     lineSet.suntilt = suntilt;
 
-    var topradius = radius;
-    var bottomradius = radius;
+    let topradius = radius;
+    let bottomradius = radius;
 
-    var winter = false;
+    let winter = false;
     if (flip && (realtime > 90 && realtime <= 270)) {
         if (tiltRad > 0) {
             winter = true;
@@ -187,10 +187,10 @@ sdGeoCtrl.drawLineSet = function ($scope, rotation) {
         bottomradius = minorHalfAdjusted;
     }
 
-    var leftradius;
-    var rightradius;
-    var leftblockradius;
-    var rightblockradius;
+    let leftradius;
+    let rightradius;
+    let leftblockradius;
+    let rightblockradius;
 
     if (realtime < 90) {
         leftradius = radius;

@@ -1,11 +1,11 @@
 ﻿﻿(function (angular) {
 	'use strict';
 
-	var sdHelioCtrl = window.sdHelioCtrl;
-	var sdGeoCtrl = window.sdGeoCtrl;
-	var sdDir = window.sdDir;
+	const sdHelioCtrl = window.sdHelioCtrl;
+	const sdGeoCtrl = window.sdGeoCtrl;
+	const sdDir = window.sdDir;
 
-	var app = angular.module('sundial', []);
+	const app = angular.module('sundial', []);
 
 	app.controller('heliocentricController', function ($scope, $interval) {
 		sdHelioCtrl.controller($scope, $interval);

@@ -1,7 +1,7 @@
-﻿var sdDir = {};
+﻿const sdDir = {};
 
 sdDir.drawGeoGlobeDirective = function () {
-	var template = '';
+	let template = '';
 	template += '<svg width="{{globe.boxWidth}}" height="{{globe.boxWidth}}">';
 	template += '<clipPath id="top-left"><rect x="0" y="0" width="{{globe.boxWidth / 2}}" height="{{globe.boxWidth / 2}}" ></rect></clipPath>';
 	template += '<clipPath id="top-right"><rect x="{{globe.boxWidth / 2}}" y="0" width="{{globe.boxWidth / 2}}" height="{{globe.boxWidth / 2}}" ></rect></clipPath>';
@@ -33,7 +33,7 @@ sdDir.drawGeoGlobeDirective = function () {
 };
 
 sdDir.drawHelioGlobeDirective = function () {
-	var template = '';
+	let template = '';
 	template += '<svg width="{{globe.boxWidth}}" height="{{globe.boxWidth}}">';
 	template += '<clipPath id="left-prime-meridian"><rect x="0" y="0" width="{{globe.boxWidth / 2}}" height="{{globe.boxWidth}}" ></rect></clipPath>';
 	template += '<clipPath id="right-prime-meridian"><rect x="{{globe.boxWidth / 2}}" y="0" width="{{globe.boxWidth / 2}}" height="{{globe.boxWidth}}" ></rect></clipPath>';
